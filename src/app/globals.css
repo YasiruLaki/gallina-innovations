@@ -1,26 +1,41 @@
-@import "tailwindcss";
+@import url('https://fonts.cdnfonts.com/css/helvetica-neue-55');
+@import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+    --brown1: #dfd1b9;
+    --brown2: #958979;
+    --grey1: #939598;
+    --grey2: #58595b;
+    --grey3: #58595b6f;
+    --black: black;
+    --background: #0A0A0A;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --font-size-heading1: 96px;
+    --font-size-heading2: 64px;
+    --font-size-heading3: 40px;
+    --font-size-heading4: 32px;
+    --font-size-heading5: 26px;
+    --font-size-heading6: 20px;
+    --font-size-heading7: 15px;
   }
-}
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background);
+  font-family: "Helvetica Neue", sans-serif;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
