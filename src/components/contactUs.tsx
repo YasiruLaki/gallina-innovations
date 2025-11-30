@@ -73,18 +73,18 @@ const ContactPage = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
                 <ContactDetail
                   label="General Inquiries"
                   email="info@gallinainnovations.com"
-                  phone="+94 71 654 7654"
+                  phone="+94 76 761 8415"
                 />
                 <ContactDetail
                   label="CEO"
                   email="thishyankya@gallinainnovations.com"
-                  phone="+94 71 654 7654"
+                  phone="+94 77 902 9168 (Thishyankya)"
                 />
               </div>
               <motion.div variants={itemVariants}>
                 <p className="text-zinc-400">Address</p>
                 <p className="text-white text-lg mt-2">
-                  No. 123, Matara Road, Galle, Sri Lanka.
+                  No 290, Henry Pedric Mawatha, Galle
                 </p>
               </motion.div>
               <motion.div

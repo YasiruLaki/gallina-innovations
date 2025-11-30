@@ -31,9 +31,10 @@ const MenuItem: React.FC<{
   const mainLink = (
     <Link
       href={item.href || '#'}
-      onClick={isExpanded ? (e) => e.preventDefault() : closeMenu} // Prevent navigation for parent items
+      onClick={isExpanded ? (e) => e.preventDefault() : closeMenu}
       className={`
-        flex justify-between items-center text-4xl font-light py-4 transition-colors
+        flex justify-between items-center font-light py-4 transition-colors
+        text-2xl sm:text-3xl md:text-4xl lg:text-4xl
         ${item.name === 'Home' ? 'bg-[var(--brown1)] text-black' : ''}
         hover:text-white px-4
       `}
@@ -55,7 +56,7 @@ const MenuItem: React.FC<{
       {mainLink}
       {/* Sub-menu items */}
       {isExpanded && (
-        <ul className="pl-8 text-xl text-white/70">
+        <ul className="pl-8 text-lg sm:text-xl md:text-2xl text-white/70">
           {item.subItems.map((subItem) => (
             <li key={subItem.name} className="py-2 flex justify-between items-center">
               <Link
@@ -84,14 +85,10 @@ const MobileMenu: React.FC = () => {
   return (
     <>
       {/* 1. Navbar Header (Visible always) */}
-    <header className="fixed top-0 left-0 z-[60] p-4 flex flex-col items-center text-white pointer-events-auto right-0">
-      <div className="flex items-center justify-center w-full">
+    <header className="fixed top-0 left-0 z-[60] p-3 pr-[55px] flex flex-col items-center text-white pointer-events-auto right-0">
+      <div className="flex items-center justify-end w-full">
         {/* Rounded border around text + icon */}
-        <div className="flex items-center gap-6 bg-black/20 border border-white/20 rounded-2xl px-4 py-2 backdrop-blur-xs">
-        {/* Centered Text instead of Logo */}
-        <Link href="/" className="flex items-center justify-center">
-          <span className="text-4xl font-extralight text-[var(--grey1)]">gallina innovations.</span>
-        </Link>
+        <div className="flex items-center gap-6">
 
         {/* Animated Hamburger Icon */}
         <button
@@ -105,8 +102,8 @@ const MobileMenu: React.FC = () => {
             <rect
               x="8"
               y="12"
-              width="24"
-              height="3"
+              width="35"
+              height="2"
               rx="1.5"
               fill="white"
               style={{
@@ -116,9 +113,9 @@ const MobileMenu: React.FC = () => {
             />
             <rect
               x="8"
-              y="19"
-              width="24"
-              height="3"
+              y="22"
+              width="35"
+              height="2"
               rx="1.5"
               fill="white"
               style={{
@@ -128,9 +125,9 @@ const MobileMenu: React.FC = () => {
             />
             <rect
               x="8"
-              y="26"
-              width="24"
-              height="3"
+              y="32"
+              width="35"
+              height="2"
               rx="1.5"
               fill="white"
               style={{
@@ -149,22 +146,22 @@ const MobileMenu: React.FC = () => {
       <div
         className={`
           fixed inset-0 z-100 transform transition-transform duration-500 ease-in-out
-          ${isOpen ? 'translate-x-0' : 'translate-x-full'}  text-white flex backdrop-blur-xs bg-black/20 transition-colors
+          ${isOpen ? 'translate-x-0 ' : 'translate-x-full'}  text-white flex backdrop-blur-xs transition-colors
         `}
       >
         {/* Left Sidebar (Dark, 25% width) */}
-        <div className="w-1/4 h-full p-6 flex items-center justify-end">
+        <div className="w-1/4 h-full sm:p-6 p-2 flex items-center justify-end">
             <button
-                onClick={closeMenu}
-                className="p-4 border border-white/20 bg-black/30 rounded-full hover:bg-white/10 transition"
-                aria-label="Close Menu"
+              onClick={closeMenu}
+              className="p-4 border-1 border-white/30 bg-black/30 rounded-full hover:bg-white/10 transition"
+              aria-label="Close Menu"
             >
-                <X className="w-10 h-10 font-extralight" />
+              <X className="w-10 h-10" strokeWidth={1} />
             </button>
         </div>
 
         {/* Right Menu Content (Darker, 75% width) */}
-        <div className="w-3/4 h-full bg-black p-8 flex flex-col justify-between">
+        <div className="w-3/4 h-full bg-black p-4 sm:p-8 flex flex-col justify-between">
           <nav className="flex-grow">
             <ul className="space-y-1">
               {menuItems.map((item) => (
@@ -174,7 +171,7 @@ const MobileMenu: React.FC = () => {
           </nav>
 
           {/* Footer/Copyright */}
-          <footer className="mt-8 text-xs text-white/50">
+          <footer className="mt-8 text-xs sm:text-sm md:text-base text-white/50">
             &copy; Galina Innovations 2025
           </footer>
         </div>

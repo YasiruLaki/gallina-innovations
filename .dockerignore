@@ -1,0 +1,25 @@
+# Node modules and build output
+node_modules
+.next
+out
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+
+# Env files
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Misc
+*.swp
+*.swo
+.idea/
+.vscode/
+coverage/
