@@ -5,26 +5,45 @@ import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
 const images = [
   {
-    src: "https://djpadb6zmchmi.cloudfront.net/2025/10/coco-bay-unawatuna-Rectangle-5.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-1.jpg",
     alt: "Architectural structure with strong shadows",
     fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://images.trvl-media.com/lodging/12000000/11260000/11251400/11251319/69d5ee87.jpg?impolicy=fcrop&w=1200&h=800&p=1&q=medium",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-2.jpg",
     alt: "Modern building with a tree",
     fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://static.travelated.com/storage/hotels3/848/848136/property/35204689581.webp?w=3840&webp.quality=75&format=webp&scale=down&mode=crop",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-3.jpg",
     alt: "Architectural structure with strong shadows",
     fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://q-xx.bstatic.com/xdata/images/hotel/max500/510936223.jpg?k=644b93181f0605016e919be07dd5133cc8781e2d8df0d620ac0969c7a47f59fd&o=",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-4.jpg",
     alt: "Modern building with a tree",
     fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
   },
-  // ... you can add more images
+  {
+    src: "https://cdn.gallinainnovations.com/uploads/abt-5.jpg",
+    alt: "Architectural structure with strong shadows",
+    fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
+  },
+  {
+    src: "https://cdn.gallinainnovations.com/uploads/abt-6.jpg",
+    alt: "Modern building with a tree",
+    fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
+  },
+  {
+    src: "https://cdn.gallinainnovations.com/uploads/abt-7.jpg",
+    alt: "Architectural structure with strong shadows",
+    fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
+  },
+  {
+    src: "https://cdn.gallinainnovations.com/uploads/abt-8.jpg",
+    alt: "Modern building with a tree",
+    fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
+  }
 ];
 
 const App: React.FC = () => {
@@ -91,7 +110,7 @@ const App: React.FC = () => {
   return (
     <div
       ref={ref}
-      className="min-h-screen p-8 sm:p-12 md:px-[80px] font-sans flex flex-col antialiased text-gray-200"
+      className="sm:p-8 px-4 sm:px-8 lg:px-16 font-sans flex flex-col antialiased text-gray-200"
     >
       {/* Header Section */}
       <header className="mb-12 mx-auto">
@@ -106,7 +125,7 @@ const App: React.FC = () => {
           className="mb-2 flex items-center gap-x-4"
         >
           <div
-            className="flex-grow border-b border-solid border-gray-500"
+            className=" flex-grow border-b border-solid border-gray-500"
             aria-hidden="true"
           ></div>
           <h1 className="text-3xl md:text-4xl lg:text-[64px] font-medium whitespace-nowrap">
@@ -122,7 +141,7 @@ const App: React.FC = () => {
             skewY: textSkew,
             color: highlight2,
           }}
-          className="text-3xl md:text-4xl lg:text-[64px] font-medium mb-2"
+          className="text-3xl md:text-4xl lg:text-[64px] font-medium mb-1"
         >
           ecosystems sketched with empathy, built
         </motion.h1>
@@ -152,7 +171,7 @@ const App: React.FC = () => {
             scale: textScale,
             skewY: textSkew,
           }}
-          className="mt-[60px] text-lg md:text-[40px] text-[var(--brown1)] font-light leading-7 md:leading-12 text-right mx-auto"
+          className="sm:mt-[60px] sm:text-2xl text-xl md:text-[40px] text-[var(--brown1)] font-light leading-7 md:leading-12 text-right mx-auto"
         >
           We don’t just shape spaces. We nurture environments that last, evolve,
           and live in harmony with nature.
@@ -161,39 +180,52 @@ const App: React.FC = () => {
 
       {/* Main - horizontal scrolling ticker */}
       <main className="flex-grow relative w-screen overflow-hidden -mx-8 sm:-mx-12 md:-mx-[80px]">
-        <motion.div
-          style={{ x: tickerX }}
-          className="flex gap-8 whitespace-nowrap w-[200vw] will-change-transform"
-        >
-          {[...images, ...images].map((img, i) => (
-            <motion.img
-              key={i}
-              src={img.src}
-              alt={img.alt}
-              className="inline-block w-[40vw] max-w-[400px] h-72 md:h-auto object-cover select-none grayscale-100"
-              onError={(e) => {
-                e.currentTarget.src = img.fallback;
-              }}
-              draggable={true}
-              style={{
-                scale: imageScale,
-                transformOrigin: "center center",
-              }}
-            />
-          ))}
-        </motion.div>
+        {(() => {
+          const Ticker: React.FC = () => {
+            const speedFactor = 1;
+            const end = `${-55 * speedFactor}%`;
+            const localTickerX = useTransform(smoothProgress, [0, 1], ["0%", end]);
+            const localImageScale = useTransform(smoothProgress, [0, 0.5, 1], [1, 1.05, 1]);
+
+            return (
+              <motion.div
+                style={{ x: localTickerX }}
+                className="flex gap-8 whitespace-nowrap w-[200vw] will-change-transform"
+              >
+                {[...images, ...images].map((img, i) => (
+                  <motion.img
+                    key={i}
+                    src={img.src}
+                    alt={img.alt}
+                    className="inline-block w-[40vw] max-w-[400px] h-72 md:h-auto object-cover select-none grayscale-90 brightness-80 contrast-115"
+                    onError={(e) => {
+                      e.currentTarget.src = img.fallback;
+                    }}
+                    draggable={true}
+                    style={{
+                      scale: localImageScale,
+                      transformOrigin: "center center",
+                    }}
+                  />
+                ))}
+              </motion.div>
+            );
+          };
+
+          return <Ticker />;
+        })()}
       </main>
 
       {/* Scroll hint / arrow */}
-      <div className="-translate-y-15 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 z-100">
-        <div className="flex items-center justify-center w-30 h-30 border-2 border-[var(--grey2)] rounded-full cursor-pointer hover:bg-[var(--grey3)] hover:cursor-pointer hover:border-gray-500 transition-all duration-300">
+      <div className="sm:-translate-y-15 -translate-y-7 left-8 translate-x-4 md:left-8 md:translate-x-0 z-100">
+        <div className="flex items-center justify-center sm:w-30 sm:h-30 w-20 h-20 border-1 border-[var(--grey2)] rounded-full cursor-pointer hover:bg-[var(--grey3)] hover:cursor-pointer hover:border-gray-500 transition-all duration-300">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={0.75}
             stroke="currentColor"
-            className="w-10 h-20 text-[var(--grey1)]"
+            className="w-12 h-20 text-[var(--grey1)]"
           >
             <path
               strokeLinecap="round"

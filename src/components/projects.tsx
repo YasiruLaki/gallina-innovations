@@ -16,7 +16,7 @@ import {
 // --- TYPE DEFINITIONS ---
 // ...existing code...
 
-type Section = "Residential" | "Industrial" | "Landscape";
+type Section = "Residential" | "Hospitality" | "Commercial";
 
 // --- FIREBASE DATA ---
 type FirestoreProject = {
@@ -31,10 +31,20 @@ type FirestoreProject = {
 // --- REUSABLE COMPONENTS ---
 
 // 1. Project Card Component
-const ProjectCard: React.FC<{ project: FirestoreProject; onClick: () => void }> = ({ project, onClick }) => (
-  <div className="flex-shrink-0 w-full sm:w-[45%] md:w-[30%] snap-start mt-4 cursor-pointer" onClick={onClick}>
-    <h3 className="text-3xl font-extralight text-zinc-400 underline">{project.title}</h3>
-    <p className="text-2xl font-extralight text-zinc-400 mb-3 underline">{project.location}</p>
+const ProjectCard: React.FC<{
+  project: FirestoreProject;
+  onClick: () => void;
+}> = ({ project, onClick }) => (
+  <div
+    className="flex-shrink-0 w-full  sm:w-[45%] lg:w-[30%] snap-start mt-4 cursor-pointer"
+    onClick={onClick}
+  >
+    <h3 className="text-3xl font-extralight text-zinc-400 underline">
+      {project.title}
+    </h3>
+    <p className="text-2xl font-extralight text-zinc-400 mb-3 underline">
+      {project.location}
+    </p>
     <motion.div
       className="bg-zinc-800/50 aspect-square w-full mb-4 bg-cover bg-center relative overflow-hidden group"
       initial={{ opacity: 0 }}
@@ -66,10 +76,11 @@ const ProjectCard: React.FC<{ project: FirestoreProject; onClick: () => void }> 
 );
 
 // 2. Horizontal Scroller Component
-const HorizontalProjectScroller: React.FC<{ projects: FirestoreProject[]; onProjectClick: (project: FirestoreProject) => void }> = ({
-  projects,
-  onProjectClick,
-}) => {
+const HorizontalProjectScroller: React.FC<{
+  projects: FirestoreProject[];
+  onProjectClick: (project: FirestoreProject) => void;
+  scrollerId?: string;
+}> = ({ projects, onProjectClick, scrollerId }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -92,36 +103,32 @@ const HorizontalProjectScroller: React.FC<{ projects: FirestoreProject[]; onProj
 
   return (
     <div className="relative group">
-      {/* Left Scroll Button */}
-      <button
-        onClick={() => scroll("left")}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-zinc-800/80 hover:bg-zinc-700 text-white rounded-full p-3 transition-opacity opacity-0 group-hover:opacity-100 disabled:opacity-0"
-      >
-        <ChevronLeft size={24} />
-      </button>
 
       {/* Projects Container */}
       <div
         ref={scrollContainerRef}
         className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide py-4"
+        data-scroller={scrollerId}
       >
         {projects.map((p) => (
-          <ProjectCard key={p.id || p.title} project={p} onClick={() => onProjectClick(p)} />
+          <ProjectCard
+            key={p.id || p.title}
+            project={p}
+            onClick={() => onProjectClick(p)}
+          />
         ))}
       </div>
-
-      {/* Right Scroll Button */}
-      <button
-        onClick={() => scroll("right")}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-zinc-800/80 hover:bg-zinc-700 text-white rounded-full p-3 transition-opacity opacity-0 group-hover:opacity-100 disabled:opacity-0"
-      >
-        <ChevronRight size={24} />
-      </button>
     </div>
   );
 };
 
 // 3. Accordion Section Component
+const sectionSubNames: Record<Section, string> = {
+  Residential: "Landscape",
+  Hospitality: "Hotels & Villas",
+  Commercial: "Industrial",
+};
+
 const AccordionSection: React.FC<{
   title: Section;
   children: React.ReactNode;
@@ -134,19 +141,33 @@ const AccordionSection: React.FC<{
       className={`flex items-center justify-between w-full py-8 px-0 transition-colors duration-400 group
         ${isOpen ? "bg-[var(--brown1)]" : "hover:bg-[var(--brown1)]"}`}
     >
-      <div className="flex items-center justify-between w-full px-8">
-        {/* add padding here */}
-        <span className={`text-6xl font-light text-zinc-200 group-hover:text-black ${isOpen ? "!text-black" : ""}`}>{title}</span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
+      <div className="flex sm:flex-row flex-col sm:items-end items-start w-full sm:gap-4 px-8">
+        <span
+          className={`text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-light  text-zinc-200 group-hover:text-black ${
+            isOpen ? "!text-black" : ""
+          }`}
         >
-          <ChevronDown
-            size={32}
-            className={`transition-colors ${isOpen ? "text-black" : "text-zinc-500"} group-hover:text-black`}
-          />
-        </motion.div>
+          {title}
+        </span>
+        <span
+          className={`text-xl sm:text-2xl md:text-3xl lg:text-3xl font-light text-zinc-400 group-hover:text-black ${
+            isOpen ? "!text-black" : ""
+          } mt-2`}
+        >
+          ({sectionSubNames[title]})
+        </span>
       </div>
+      <motion.div
+        animate={{ rotate: isOpen ? 180 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <ChevronDown
+          size={32}
+          className={`transition-colors ${
+            isOpen ? "text-black" : "text-zinc-500"
+          } group-hover:text-black`}
+        />
+      </motion.div>
     </button>
     <AnimatePresence>
       {isOpen && (
@@ -167,12 +188,21 @@ const AccordionSection: React.FC<{
 // --- MAIN PAGE COMPONENT ---
 export default function ProjectsPage() {
   const [openSection, setOpenSection] = useState<Section | null>("Residential");
-  const [projectsByCategory, setProjectsByCategory] = useState<Record<Section, FirestoreProject[]>>({
+  const [projectsByCategory, setProjectsByCategory] = useState<
+    Record<Section, FirestoreProject[]>
+  >({
     Residential: [],
-    Industrial: [],
-    Landscape: [],
+    Hospitality: [],
+    Commercial: [],
   });
   const router = useRouter();
+
+  // Refs for each category section
+  const sectionRefs = {
+    Residential: useRef<HTMLDivElement>(null),
+    Hospitality: useRef<HTMLDivElement>(null),
+    Commercial: useRef<HTMLDivElement>(null),
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -192,8 +222,8 @@ export default function ProjectsPage() {
       // Group by category
       const grouped: Record<Section, FirestoreProject[]> = {
         Residential: [],
-        Industrial: [],
-        Landscape: [],
+        Hospitality: [],
+        Commercial: [],
       };
       projects.forEach((p) => {
         if (grouped[p.category]) grouped[p.category].push(p);
@@ -201,6 +231,20 @@ export default function ProjectsPage() {
       setProjectsByCategory(grouped);
     };
     fetchProjects();
+
+    // Expose scrollToCategory globally for projectCategories.tsx
+    (window as Window & { scrollToProjectCategory?: (section: Section) => void }).scrollToProjectCategory = (section: Section) => {
+      setOpenSection(section);
+      setTimeout(() => {
+        const ref = sectionRefs[section];
+        if (ref?.current) {
+          ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    };
+    return () => {
+      delete (window as Window & { scrollToProjectCategory?: (section: Section) => void }).scrollToProjectCategory;
+    };
   }, []);
 
   const handleToggle = (section: Section) => {
@@ -212,16 +256,24 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="bg-[#0A0A0A] text-white min-h-screen font-sans p-4 sm:p-8 md:p-16">
+    <motion.div
+      className="bg-[#0A0A0A] text-white min-h-screen font-sans px-4 sm:px-8 lg:px-16 md:pt-10 lg:pt-20"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
       <header className="flex flex-col lg:flex-row lg:items-center justify-between pb-10">
-        <h1 className="text-7xl md:text-8xl font-medium mt-10 lg:mt-0">Projects</h1>
+        <h1 className="text-7xl md:text-8xl font-medium mt-10 lg:mt-0">
+          Projects
+        </h1>
         <a
           href="#"
           className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-light mt-6 lg:mt-0"
         >
           Discover unique projects from all over the world{" "}
           <ArrowRight size={20} />
-        </a>  
+        </a>
       </header>
 
       <div
@@ -231,19 +283,93 @@ export default function ProjectsPage() {
 
       <main>
         {(Object.keys(projectsByCategory) as Section[]).map((sectionName) => (
-          <AccordionSection
-            key={sectionName}
-            title={sectionName}
-            isOpen={openSection === sectionName}
-            onToggle={() => handleToggle(sectionName)}
-          >
-            <HorizontalProjectScroller
-              projects={projectsByCategory[sectionName]}
-              onProjectClick={handleProjectClick}
-            />
-          </AccordionSection>
+          <div ref={sectionRefs[sectionName]} key={sectionName}>
+            <AccordionSection
+              title={sectionName}
+              isOpen={openSection === sectionName}
+              onToggle={() => handleToggle(sectionName)}
+            >
+              <HorizontalProjectScroller
+                projects={projectsByCategory[sectionName]}
+                onProjectClick={handleProjectClick}
+                scrollerId={sectionName}
+              />
+
+              {projectsByCategory[sectionName].length > 0 && (
+                <>
+                  {/* Scroll to previous arrow */}
+                  <div className="absolute -translate-y-80 md:-translate-y-90 md:-translate-x-8 -translate-x-2 z-100">
+                    <div
+                      className="flex items-center justify-center sm:w-20 sm:h-20 w-15 h-15 border-1 border-[var(--grey2)] rounded-full cursor-pointer bg-black/60 hover:bg-black/70 hover:cursor-pointer hover:border-gray-500 transition-all duration-300"
+                      onClick={() => {
+                        // Find the scroller for this section and scroll left
+                        const scroller = document.querySelector(
+                          `[data-scroller="${sectionName}"]`
+                        ) as HTMLDivElement | null;
+                        if (scroller) {
+                          scroller.scrollBy({
+                            left: -scroller.clientWidth * 0.9,
+                            behavior: "smooth",
+                          });
+                        }
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={0.75}
+                        stroke="currentColor"
+                        className="w-12 h-12 text-[var(--grey1)]"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Scroll to next arrow */}
+                  <div className="absolute right-0 -translate-y-80 md:-translate-y-90 md:-translate-x-8 -translate-x-2 z-100">
+                    <div
+                      className="flex items-center justify-center sm:w-20 sm:h-20 w-15 h-15 border-1 border-[var(--grey2)] rounded-full cursor-pointer bg-black/60 hover:bg-black/70 hover:cursor-pointer hover:border-gray-500 transition-all duration-300"
+                      onClick={() => {
+                        // Find the scroller for this section and scroll right
+                        const scroller = document.querySelector(
+                          `[data-scroller="${sectionName}"]`
+                        ) as HTMLDivElement | null;
+                        if (scroller) {
+                          scroller.scrollBy({
+                            left: scroller.clientWidth * 0.9,
+                            behavior: "smooth",
+                          });
+                        }
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={0.75}
+                        stroke="currentColor"
+                        className="w-12 h-12 text-[var(--grey1)]"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </>
+              )}
+            </AccordionSection>
+          </div>
         ))}
       </main>
-    </div>
+    </motion.div>
   );
 }

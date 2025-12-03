@@ -42,13 +42,18 @@ const ContactDetail: React.FC<{ label: string; email: string; phone: string }> =
   </motion.div>
 );
 
-const ContactPage = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
+const ContactPage = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<typeof motion.div>>(
   (props, ref) => {
     return (
-      <div
+      <motion.div
         ref={ref}
         {...props}
-        className="bg-[var(--background)] text-white min-h-screen flex items-center justify-center md:px-[80px] px-[30px] font-sans"
+        id="contactUs"
+        className="bg-[var(--background)] text-white min-h-screen flex items-center justify-center px-4 sm:px-8 md:px-16 font-sans mt-10 lg:mt-0"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.main
           className="w-full"
@@ -194,7 +199,7 @@ const ContactPage = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
             </motion.section>
           </div>
         </motion.main>
-      </div>
+      </motion.div>
     );
   }
 );

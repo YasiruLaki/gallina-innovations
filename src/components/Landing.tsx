@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import Logo from "../../public/logo-white.png";
 
@@ -45,7 +46,7 @@ export default function Landing() {
         if (!mounted) return;
 
         if (snap.exists()) {
-          const data = snap.data() as Record<string, any>;
+          const data = snap.data() as Record<string, unknown>;
           // expect an array field like `images` (or fallback to `slides`)
           const imgs = Array.isArray(data?.images) ? data.images : Array.isArray(data?.slides) ? data.slides : [];
           if (imgs.length) setSlides(imgs);
@@ -72,7 +73,13 @@ export default function Landing() {
   }, [slides.length]);
 
   return (
-    <div className="relative sm:min-h-screen min-h-[90vh] max-h-screen overflow-hidden flex flex-col">
+    <motion.div
+      className="relative sm:min-h-screen min-h-[90vh] max-h-screen overflow-hidden flex flex-col"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
       {/* Slideshow background */}
       {slides.map((src, idx) => (
       <div
@@ -126,44 +133,6 @@ export default function Landing() {
       </div>
       </div>
 
-      <div
-      id="logo-gradient-overlay"
-      className="inset-0 pointer-events-none fixed"
-      style={{ zIndex: 20 }}
-      />
-
-      <script
-      dangerouslySetInnerHTML={{
-        __html: `
-        (function () {
-        var overlay = document.getElementById('logo-gradient-overlay');
-        if (!overlay) return;
-        var maxScroll = 300;
-        function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-        function lerp(a, b, t) { return a + (b - a) * t; }
-        var ticking = false;
-        function update() {
-          var s = clamp(window.scrollY, 0, maxScroll);
-          var t = s / maxScroll;
-          var topAlpha = lerp(0, 0.85, t);
-          var fadePoint = Math.round(lerp(25, 70, t));
-          overlay.style.background = 'linear-gradient(to bottom, rgba(0,0,0,' + topAlpha + ') 0%, rgba(0,0,0,0)20%)';
-          overlay.style.opacity = String(lerp(0, 1, t));
-          ticking = false;
-        }
-        function onScroll() {
-          if (ticking) return;
-          ticking = true;
-          requestAnimationFrame(update);
-        }
-        update();
-        window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', function () { update(); }, { passive: true });
-        })();
-        `,
-      }}
-      />
-
       {/* Bottom content */}
       <div className="z-10 flex flex-col sm:flex-row justify-end lg:justify-between items-start lg:items-end px-4 sm:px-8 lg:px-16  pb-16 md:pb-12 lg:pb-10 md:gap-8 absolute bottom-0  left-0 right-0 lg:relative lg:h-screen">
       {/* Left side - Text content */}
@@ -215,6 +184,6 @@ export default function Landing() {
         </div>
       </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
