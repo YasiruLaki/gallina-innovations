@@ -187,7 +187,7 @@ const AccordionSection: React.FC<{
 
 // --- MAIN PAGE COMPONENT ---
 export default function ProjectsPage() {
-  const [openSection, setOpenSection] = useState<Section | null>("Residential");
+  const [openSection, setOpenSection] = useState<Section | null>("Hospitality");
   const [projectsByCategory, setProjectsByCategory] = useState<
     Record<Section, FirestoreProject[]>
   >({

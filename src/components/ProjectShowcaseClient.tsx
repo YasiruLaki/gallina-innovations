@@ -13,19 +13,19 @@ import { X } from "lucide-react";
 
 const pageContainer = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.08 } }
 };
 const headingVariant = {
   hidden: { opacity: 0, y: 26, skewY: 2 },
-  visible: { opacity: 1, y: 0, skewY: 0, transition: { duration: 0.72 } },
+  visible: { opacity: 1, y: 0, skewY: 0, transition: { duration: 0.72 } }
 };
 const paraVariant = {
   hidden: { opacity: 0, y: 18 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 const gridItem = {
   hidden: { opacity: 0, y: 18, scale: 0.98 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6 } }
 };
 
 type FirestoreProject = {
@@ -37,7 +37,6 @@ type FirestoreProject = {
   category?: string;
   approach?: string;
   catchline?: string;
-  // clientFeedback?: string;
 };
 
 const ProjectShowcaseClient: React.FC = () => {
@@ -45,13 +44,13 @@ const ProjectShowcaseClient: React.FC = () => {
   const projectName = searchParams.get("name");
   const [project, setProject] = useState<FirestoreProject | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalImg, setModalImg] = useState<string | null>(null);
-  const [selectedImg, setSelectedImg] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!projectName) return;
+
     const fetchProject = async () => {
       setLoading(true);
       const q = query(
@@ -66,6 +65,7 @@ const ProjectShowcaseClient: React.FC = () => {
       }
       setLoading(false);
     };
+
     fetchProject();
   }, [projectName]);
 
@@ -76,6 +76,7 @@ const ProjectShowcaseClient: React.FC = () => {
       </div>
     );
   }
+
   if (!project) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
@@ -87,11 +88,13 @@ const ProjectShowcaseClient: React.FC = () => {
   return (
     <div>
       <MobileMenu />
+
       <motion.main
         initial="hidden"
         variants={pageContainer}
         className="min-h-screen text-white mx-auto select-none mt-30"
       >
+        {/* Title */}
         <motion.h1
           initial="hidden"
           whileInView="visible"
@@ -101,9 +104,10 @@ const ProjectShowcaseClient: React.FC = () => {
         >
           {project.title}, {project.location}
         </motion.h1>
-        {/* Header Section */}
+
+        {/* Description */}
         <motion.section
-          className="flex flex-col md:flex-row md:items-start md:gap-20 pb-12 px-4 sm:px-8 md:px-16 mt-10"
+          className="flex flex-col md:items-start md:gap-20 pb-12 px-4 sm:px-8 md:px-16 mt-10"
           variants={pageContainer}
         >
           <div className="flex-1">
@@ -112,98 +116,58 @@ const ProjectShowcaseClient: React.FC = () => {
               whileInView="visible"
               viewport={{ once: true, amount: 0.18 }}
               variants={paraVariant}
-              className="text-[var(--grey1)] text-xl  mb-6 !font-extralight"
+              className="text-[var(--grey1)] text-xl mb-6 !font-extralight"
             >
               {project.description}
             </motion.p>
 
-            <div
-              className="flex-grow border-b border-solid border-gray-500"
-              aria-hidden="true"
-            ></div>
+            <div className="flex-grow border-b border-solid border-gray-500 mb-10 md:mb-0" />
+          </div>
 
-            <motion.div
-              className="flex flex-wrap gap-4 mt-6"
-              variants={pageContainer}
-            >
-              {project.imageUrls?.map((url: string, i: number) => (
-                <motion.button
+          {/* Multi-image view */}
+          {project.imageUrls && project.imageUrls.length > 0 && (
+            <div className="w-full  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {project.imageUrls.map((url, i) => (
+                <motion.div
                   key={url}
+                  variants={gridItem}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.2 }}
-                  variants={gridItem}
-                  whileHover={{
-                    scale: 1.06,
-                    rotate: i % 2 === 0 ? -1.5 : 1.5,
-                  }}
+                  className="relative bg-gray-300 aspect-[4/3] overflow-hidden cursor-zoom-in"
                   onClick={() => {
-                    setSelectedImg(url);
+                    setCurrentIndex(i);
+                    setModalOpen(true);
                   }}
-                  className="w-20 h-20 bg-gray-300 cursor-pointer shadow-md overflow-hidden"
-                  style={{
-                    backgroundImage: `url(${url})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                  aria-label={`Preview image ${i + 1}`}
-                />
+                >
+                  <div
+                    className="absolute inset-0 bg-center bg-cover"
+                    style={{ backgroundImage: `url(${url})` }}
+                  />
+                </motion.div>
               ))}
-            </motion.div>
-          </div>
-          {/* Large cover image */}
-          {(selectedImg || project.imageUrls?.[0]) && (
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={gridItem}
-              className="w-full md:flex-1 md:max-w-3xl bg-gray-300 mt-10 md:mt-2 relative overflow-hidden aspect-video cursor-zoom-in"
-              style={{
-                minHeight: "220px",
-                maxHeight: "420px",
-              }}
-              onClick={() => {
-                setModalImg(selectedImg || project.imageUrls![0]);
-                setModalOpen(true);
-              }}
-              aria-label="Open large image modal"
-            >
-              <div
-                id="project-preview-large-img"
-                className="absolute inset-0 bg-center bg-cover"
-                style={{ backgroundImage: `url(${selectedImg || project.imageUrls?.[0]})` }}
-                role="img"
-                aria-label={project.title}
-              />
-            </motion.div>
+            </div>
           )}
-          {/* Modal for actual image view */}
-          {modalOpen && modalImg && (
+
+          {/* Modal */}
+          {modalOpen && (
             <div
               ref={modalRef}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 bg-opacity-80"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
               onClick={(e) => {
-                // Only close modal if the overlay itself is clicked, not its children
-                if (e.target === e.currentTarget) {
-                  setModalOpen(false);
-                  setModalImg(null);
-                }
+                if (e.target === e.currentTarget) setModalOpen(false);
               }}
             >
               <div className="relative">
                 <img
-                  src={modalImg}
-                  alt="Project Large Preview"
+                  src={project.imageUrls![currentIndex]}
+                  alt="Project Large"
                   className="max-w-full max-h-[90vh] shadow-2xl border-1 border-white/40"
-                  style={{ display: "block" }}
                 />
+
                 <button
-                  onClick={() => {
-                    setModalOpen(false);
-                    setModalImg(null);
-                  }}
-                  className="absolute top-5 right-5 border-1 border-white/40 bg-black/30 bg-opacity-60 text-white rounded-full p-7 text-2xl font-bold hover:bg-opacity-80 flex items-center justify-center"
+                  onClick={() => setModalOpen(false)}
+                  className="absolute top-5 right-5 border border-white/40 bg-black/30 text-white rounded-full p-3 text-xl hover:bg-opacity-80 flex items-center justify-center"
                   aria-label="Close modal"
                 >
                   <X />
@@ -212,41 +176,34 @@ const ProjectShowcaseClient: React.FC = () => {
             </div>
           )}
         </motion.section>
-        <div
-          className="flex-grow border-b border-solid border-gray-500 mx-4 sm:mx-8 md:mx-16"
-          aria-hidden="true"
-        ></div>
-        {/* Approach Section */}
-        <motion.section
-          className="flex flex-col md:flex-row  md:gap-15 py-12 px-4 sm:px-8 md:px-16"
-          variants={pageContainer}
-        >
+
+        {/* Approach */}
+        {project.approach && (
+          <>
           <motion.h2
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.18 }}
-            variants={headingVariant}
-            className="text-4xl md:text-6xl sm:text-5xl font-bold mb-6 md:mb-0"
-          >
-            Approach
-          </motion.h2>
-          <div className="flex-1 flex items-center">
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.18 }}
+              variants={headingVariant}
+              className="lg:text-5xl md:text-4xl sm:text-3xl text-3xl !font-light mb-6 px-4 sm:px-8 md:px-16 mt-5"
+            >
+              Our Approach
+            </motion.h2>
             <motion.p
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.18 }}
               variants={paraVariant}
-              className="text-[var(--grey1)] text-xl md:text-3xl sm:text-2xl mb-6 !font-light"
+              className="text-[var(--grey1)] text-xl md:text-3xl sm:text-2xl mb-6 !font-light px-4 sm:px-8 md:px-16"
             >
               {project.approach}
             </motion.p>
-          </div>
-        </motion.section>
-        <div
-          className="flex-grow border-b border-solid border-gray-500 mx-4 sm:mx-8 md:mx-16"
-          aria-hidden="true"
-        ></div>
-        {/* Catchline Section */}
+
+            <div className="flex-grow border-b border-solid border-gray-500 mx-4 sm:mx-8 md:mx-16" />
+          </>
+        )}
+
+        {/* Catchline */}
         {project.catchline && (
           <motion.section
             className="py-12 px-4 sm:px-8 md:px-16"
@@ -263,33 +220,9 @@ const ProjectShowcaseClient: React.FC = () => {
             </motion.h3>
           </motion.section>
         )}
-        <div
-          className="flex-grow border-b border-solid border-gray-500 mx-4 sm:mx-8 md:mx-16"
-          aria-hidden="true"
-        ></div>
-        {/* Client Feedback Section */}
-        {/* {project.clientFeedback && (
-          <div className="py-12 px-4 sm:px-8 md:px-16">
-            <motion.span
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.6 }}
-              className="italic !text-9xl text-[var(--brown1)]"
-            >
-              “
-            </motion.span>
-            <motion.blockquote
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.7 }}
-              className="text-[var(--grey1)] text-5xl leading-13 font-light -mt-10"
-            >
-              {project.clientFeedback}
-            </motion.blockquote>
-          </div>
-        )} */}
+
+        <div className="flex-grow border-b border-solid border-gray-500 mx-4 sm:mx-8 md:mx-16" />
+
         <ContactPage />
         <CopyrightFooter />
       </motion.main>

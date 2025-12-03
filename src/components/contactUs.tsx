@@ -89,7 +89,7 @@ const ContactPage = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<ty
               <motion.div variants={itemVariants}>
                 <p className="text-zinc-400">Address</p>
                 <p className="text-white text-lg mt-2">
-                  No 290, Henry Pedric Mawatha, Galle
+                  No 290, Henry Pedric Mawatha, Galle, Sri Lanka
                 </p>
               </motion.div>
               <motion.div

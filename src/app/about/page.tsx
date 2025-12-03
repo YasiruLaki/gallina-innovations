@@ -72,9 +72,7 @@ const AboutUs: FC = () => {
 
         {/* Right side - Arrow circle */}
         <motion.div
-          className={`hidden lg:flex items-center justify-center transition-all ${
-            animate ? "opacity-100 translate-y-40" : "opacity-0 translate-y-10"
-          }`}
+          className={`hidden lg:flex items-center justify-center transition-all`}
           initial={{ opacity: 0, y: 50 }}
           animate={
             animate
@@ -96,7 +94,7 @@ const AboutUs: FC = () => {
 
       <div className="absolute bottom-8 lg:bottom-24 flex justify-end w-full pointer-events-none z-50">
         <div className="group cursor-pointer pointer-events-auto mr-8 lg:mr-24">
-          <div className="md:w-40 md:h-40 w-20 h-20 border border-white/30 rounded-full flex items-center justify-center group-hover:border-white/50 transition-colors duration-300">
+          <div className="md:w-40 md:h-40 w-20 h-20 border border-white/30 rounded-full flex items-center justify-center transition-colors duration-300">
         <motion.svg
           className="w-15 h-15 text-white"
           fill="none"
@@ -114,7 +112,7 @@ const AboutUs: FC = () => {
           />
         </motion.svg>
           </div>
-          <div className="absolute inset-0 w-40 h-40 rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 w-40 h-40 rounded-full bg-white/5 opacity-0 transition-opacity duration-300"></div>
         </div>
       </div>
 
