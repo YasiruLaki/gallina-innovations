@@ -16,6 +16,11 @@ import CopyrightFooter from "@/components/footer";
 import FeaturedProjectSection, { FirestoreProject } from "@/components/FeaturedProjectSection";
 
 export default function Home() {
+    // SEO meta tags for homepage
+    if (typeof window === 'undefined') {
+      // Only for SSR/SSG
+      // Next.js will use metadata from layout.tsx, but you can add page-specific tags here if needed
+    }
   const [featured, setFeatured] = useState<FirestoreProject | null>(null);
 
   useEffect(() => {
