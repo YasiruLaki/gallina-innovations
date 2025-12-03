@@ -26,7 +26,7 @@ export default function Home() {
   useEffect(() => {
     const fetchByName = async () => {
       try {
-        const projectName = "Mosvold";
+        const projectName = "Mosvold Villa";
 
         const q = query(
           collection(db, "projects"),
