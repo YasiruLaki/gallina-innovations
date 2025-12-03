@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 import { collection, addDoc, doc, getDoc, setDoc } from "firebase/firestore";
 
-const categories = ["Residential", "Industrial", "Landscape"];
+const categories = ["Residential", "Hospitality", "Commercial"];
 
 type UploadFile = {
   file: File;
