@@ -50,7 +50,7 @@ const AboutUs: FC = () => {
         {/* Background Image with Overlay (static - no animations) */}
         <div className="absolute inset-0">
           <Image
-            src="https://cdn.gallinainnovations.com/uploads/landing-8.jpg"
+            src="https://cdn.gallinainnovations.com/uploads/1764760107879-48a761ed6b33670d.jpg"
             alt="Modern architectural interior with a curved concrete wall and a tree"
             fill
             className="object-cover brightness-70"

@@ -100,7 +100,7 @@ const ProjectShowcaseClient: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true, amount: 0.18 }}
           variants={headingVariant}
-          className="lg:text-7xl md:text-6xl sm:text-5xl text-5xl !font-light mb-6 px-4 sm:px-8 md:px-16 underline md:decoration-4 decoration-3 offset-4"
+          className="lg:text-7xl md:text-6xl sm:text-5xl text-5xl !font-light mb-6 px-4 sm:px-8 md:px-16  md:decoration-4 decoration-3 offset-4"
         >
           {project.title}, {project.location}
         </motion.h1>

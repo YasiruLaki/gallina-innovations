@@ -5,42 +5,42 @@ import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
 const images = [
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-1.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-1.jpg",
     alt: "Architectural structure with strong shadows",
     fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-2.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-2.jpg",
     alt: "Modern building with a tree",
     fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-3.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-3.jpg",
     alt: "Architectural structure with strong shadows",
     fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-4.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-4.jpg",
     alt: "Modern building with a tree",
     fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-5.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-5.jpg",
     alt: "Architectural structure with strong shadows",
     fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-6.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-6.jpg",
     alt: "Modern building with a tree",
     fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-7.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-7.jpg",
     alt: "Architectural structure with strong shadows",
     fallback: "https://placehold.co/800x600/1a1a1a/e0e0e0?text=Image+Not+Found",
   },
   {
-    src: "https://cdn.gallinainnovations.com/uploads/abt-8.jpg",
+    src: "https://cdn.gallinainnovations.com/uploads/abt-new-8.jpg",
     alt: "Modern building with a tree",
     fallback: "https://placehold.co/800x600/3a3a3a/e0e0e0?text=Image+Not+Found",
   }
@@ -197,7 +197,7 @@ const App: React.FC = () => {
                     key={i}
                     src={img.src}
                     alt={img.alt}
-                    className="inline-block w-[40vw] max-w-[400px] h-72 md:h-auto object-cover select-none grayscale-90 brightness-80 contrast-115"
+                    className="inline-block w-[40vw] max-w-[400px] h-72 object-cover select-none grayscale-90 brightness-80 contrast-115"
                     onError={(e) => {
                       e.currentTarget.src = img.fallback;
                     }}

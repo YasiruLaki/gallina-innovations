@@ -23,9 +23,9 @@ export default function Landing() {
   const [slides, setSlides] = useState<string[]>([
     "https://cdn.gallinainnovations.com/uploads/landing-1.jpg",
     "https://cdn.gallinainnovations.com/uploads/landing-2.jpg",
-    "https://cdn.gallinainnovations.com/uploads/landing-3.jpg",
-    "https://cdn.gallinainnovations.com/uploads/landing-4.jpg",
-    "https://cdn.gallinainnovations.com/uploads/landing-5.jpg",
+    "https://cdn.gallinainnovations.com/uploads/landing-12.jpg",
+    "https://cdn.gallinainnovations.com/uploads/landing-11.jpg",
+    "https://cdn.gallinainnovations.com/uploads/landing-7.jpg",
   ]);
 
   useEffect(() => {
