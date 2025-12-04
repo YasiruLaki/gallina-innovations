@@ -2,15 +2,16 @@ import type { Metadata } from "next";
 import "./globals.css";
 import PageTransition from "@/components/PageTransition";
 import SmoothScrollClient from "@/components/SmoothScrollClient";
+import GrainyNoiseOverlay from "@/components/GrainyNoiseOverlay";
 
 export const metadata: Metadata = {
-  title: "Gallina Innovations | Sustainable Architecture & Design in Sri Lanka",
+  title: "Gallina Innovations | Sustainable Architecture & Design Sri Lanka",
   description: "Gallina Innovations is a leading architecture and design studio in Sri Lanka, specializing in sustainable, purposeful spaces for residential, hospitality, and commercial projects.",
   keywords: [
     "architecture", "design", "Sri Lanka", "sustainable", "residential", "hospitality", "commercial", "Gallina Innovations", "minimalism", "eco-friendly", "modern architecture", "Prasanna Gunawardana"
   ],
   openGraph: {
-    title: "Gallina Innovations | Sustainable Architecture & Design in Sri Lanka",
+    title: "Gallina Innovations | Sustainable Architecture & Design Sri Lanka",
     description: "Discover Gallina Innovations, a studio shaping iconic spaces with empathy and longevity. Explore our residential, hospitality, and commercial projects.",
     url: "https://gallinainnovations.com/",
     siteName: "Gallina Innovations",
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gallina Innovations | Sustainable Architecture & Design in Sri Lanka",
+    title: "Gallina Innovations | Sustainable Architecture & Design Sri Lanka",
     description: "Discover Gallina Innovations, a studio shaping iconic spaces with empathy and longevity. Explore our residential, hospitality, and commercial projects.",
     images: ["https://cdn.gallinainnovations.com/uploads/og-main.jpg"],
     site: "@GallinaInnovations"
@@ -44,7 +45,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Gallina Innovations",
+              "url": "https://gallinainnovations.com/",
+              "logo": "https://cdn.gallinainnovations.com/uploads/og-main.jpg",
+              "description": "Gallina Innovations is a leading architecture and design studio in Sri Lanka, specializing in sustainable, purposeful spaces for residential, hospitality, and commercial projects.",
+              "contactPoint": [{
+                "@type": "ContactPoint",
+                "telephone": "+94 77 902 9168",
+                "contactType": "customer service",
+                "areaServed": "LK",
+                "availableLanguage": ["English", "Sinhala"]
+              }],
+              "sameAs": [
+                "https://www.facebook.com/gallinainnovations",
+                "https://www.instagram.com/gallinainnovations"
+              ]
+            })
+          }}
+        />
+      </head>
       <body>
+        <GrainyNoiseOverlay />
         <SmoothScrollClient>
           <PageTransition>{children}</PageTransition>
         </SmoothScrollClient>

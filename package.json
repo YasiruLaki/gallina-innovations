@@ -18,6 +18,7 @@
     "popmotion": "^11.0.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-noise": "^0.2.11",
     "react-tsparticles": "^2.12.2",
     "tsparticles": "^3.9.1"
   },

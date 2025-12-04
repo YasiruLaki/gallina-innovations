@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About | Gallina Innovations",
+  description: "Learn about Gallina Innovations, a leading architecture and design studio in Sri Lanka. Discover our philosophy, team, and commitment to sustainable design.",
+  alternates: {
+    canonical: "https://gallinainnovations.com/about"
+  }
+};
 "use client";
 import Image from "next/image";
 import React, { FC, useEffect, useRef, useState } from "react";

@@ -29,6 +29,59 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Grainy noise overlay animation */
+
+
+
+.grainy-noise {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background-repeat: repeat;
+  background-size: 220px 220px;
+  opacity: 0.22;
+}
+
+.grainy-noise-1 {
+  background-image: url('https://www.transparenttextures.com/patterns/noise.png');
+  mix-blend-mode: screen;
+  animation: grainy-move-1 2.2s linear infinite;
+}
+.grainy-noise-2 {
+  background-image: url('https://www.transparenttextures.com/patterns/noise.png');
+  mix-blend-mode: multiply;
+  opacity: 0.18;
+  animation: grainy-move-2 3.1s linear infinite;
+}
+.grainy-noise-3 {
+  background-image: url('https://www.transparenttextures.com/patterns/noise.png');
+  mix-blend-mode: overlay;
+  opacity: 0.13;
+  animation: grainy-move-3 4.3s linear infinite;
+}
+
+@keyframes grainy-move-1 {
+  0% { background-position: 0 0; }
+  100% { background-position: 120px 80px; }
+}
+@keyframes grainy-move-2 {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 120px; }
+}
+@keyframes grainy-move-3 {
+  0% { background-position: 0 0; }
+  100% { background-position: 60px 60px; }
+}
+
+@keyframes grainy-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 100px 100px; }
+}
+
 
 
 @keyframes shimmer {
