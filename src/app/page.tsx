@@ -7,7 +7,6 @@ import Loading from "@/components/Loading";
 import CustomCursor from "@/components/CustomCursor";
 import MobileMenu from "@/components/MobileMenu";
 import Landing from "@/components/Landing";
-import AboutIntro from "@/components/aboutIntro";
 import ProjectCategories from "@/components/projectCategories";
 import ProjectsPage from "@/components/projects";
 import ContactPage from "@/components/contactUs";
@@ -58,7 +57,7 @@ export default function Home() {
       {/* <NavBar /> */}
       <MobileMenu />
       <Landing />
-      <AboutIntro />
+      {/* <AboutIntro /> */}
       <ProjectCategories />
       <ProjectsPage />
       {/* Featured Project Section */}

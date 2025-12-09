@@ -102,10 +102,8 @@ const App: React.FC = () => {
   );
 
   // Horizontal ticker position moves based on scroll
-  const tickerX = useTransform(smoothProgress, [0, 1], ["0%", "-55%"]);
 
-  // Parallax scale effect on images
-  const imageScale = useTransform(smoothProgress, [0, 0.5, 1], [1, 1.05, 1]);
+  // (ticker and image scale are computed locally inside the Ticker component)
 
   return (
     <div

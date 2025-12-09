@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Gallina Innovations | Sustainable Architecture & Design Sri Lanka",
     description: "Discover Gallina Innovations, a studio shaping iconic spaces with empathy and longevity. Explore our residential, hospitality, and commercial projects.",
-    url: "https://gallinainnovations.com/",
+    url: "www.gallinainnovations.com/",
     siteName: "Gallina Innovations",
     images: [
       {

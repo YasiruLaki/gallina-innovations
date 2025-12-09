@@ -27,7 +27,7 @@ export default function SmoothScrollClient({ children }: { children: React.React
       cancelAnimationFrame(rafId);
       try {
         lenis.destroy();
-      } catch (e) {
+      } catch {
         // ignore if already destroyed
       }
     };

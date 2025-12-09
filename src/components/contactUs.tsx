@@ -1,7 +1,6 @@
 "use client";
 import React, { forwardRef } from "react";
 import { motion, Variants, easeOut } from "framer-motion";
-import Image from "next/image";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -20,11 +19,11 @@ const itemVariants: Variants = {
   },
 };
 
-const ContactDetail: React.FC<{ label: string; email: string; phone: string }> = ({
-  label,
-  email,
-  phone,
-}) => (
+const ContactDetail: React.FC<{
+  label: string;
+  email: string;
+  phone: string;
+}> = ({ label, email, phone }) => (
   <motion.div variants={itemVariants} className="space-y-2">
     <p className="text-zinc-400">{label}</p>
     <a
@@ -42,62 +41,65 @@ const ContactDetail: React.FC<{ label: string; email: string; phone: string }> =
   </motion.div>
 );
 
-const ContactPage = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<typeof motion.div>>(
-  (props, ref) => {
-    return (
-      <motion.div
-        ref={ref}
-        {...props}
-        id="contactUs"
-        className="bg-[var(--background)] text-white min-h-screen flex items-center justify-center px-4 sm:px-8 md:px-16 font-sans mt-10 lg:mt-0"
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+const ContactPage = forwardRef<
+  HTMLDivElement,
+  React.ComponentPropsWithoutRef<typeof motion.div>
+>((props, ref) => {
+  return (
+    <motion.div
+      ref={ref}
+      {...props}
+      id="contactUs"
+      className="bg-[var(--background)] text-white py-25 flex items-center justify-center px-4 sm:px-8 md:px-16 font-sans mt-10 lg:mt-0"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
+      <motion.main
+        className="w-full"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        <motion.main
-          className="w-full"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Header */}
-          <motion.header variants={itemVariants} className="mb-16">
-            <h1 className="text-6xl md:text-8xl font-medium tracking-tighter">
-              Contact Us
-            </h1>
-            <p className="text-zinc-400 mt-2 text-lg">
-              Get in touch with us for any inquiries & quotations
-            </p>
-          </motion.header>
-          {/* Content Grid */}
-          <div className="grid gap-16 lg:grid-cols-2">
-            {/* Left: Contact Info */}
-            <motion.section variants={containerVariants} className="space-y-12">
-              <div className="grid gap-12 sm:grid-cols-2 border-b border-zinc-800 pb-12">
-                <ContactDetail
-                  label="General Inquiries"
-                  email="info@gallinainnovations.com"
-                  phone="+94 76 761 8415"
-                />
-                <ContactDetail
-                  label="CEO"
-                  email="thishyankya@gallinainnovations.com"
-                  phone="+94 77 902 9168 (Thishyankya)"
-                />
-              </div>
+        {/* Header */}
+        <motion.header variants={itemVariants} className="mb-16">
+          <h1 className="text-6xl md:text-8xl font-medium tracking-tighter">
+            Explore Our Work
+          </h1>
+          <p className="text-zinc-400 mt-2 text-lg">
+            Get in touch with us for any inquiries & quotations
+          </p>
+        </motion.header>
+        {/* Content Grid */}
+        <div className="grid gap-16 ">
+          {/* Left: Contact Info */}
+          <motion.section variants={containerVariants} className="space-y-12">
+            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 border-b border-zinc-800 pb-12">
+              <ContactDetail
+                label="General Inquiries"
+                email="info@gallinainnovations.com"
+                phone="+94 76 761 8415"
+              />
+              <ContactDetail
+                label="CEO"
+                email="thishyankya@gallinainnovations.com"
+                phone="+94 77 902 9168 (Thishyankya)"
+              />
               <motion.div variants={itemVariants}>
                 <p className="text-zinc-400">Address</p>
                 <p className="text-white text-lg mt-2">
                   No 290, Henry Pedric Mawatha, Galle, Sri Lanka
                 </p>
               </motion.div>
-              <motion.div
-                variants={itemVariants}
-                className="flex gap-4 pt-8"
-                aria-hidden={false}
-              >
-                {([
+            </div>
+            <motion.div
+              variants={itemVariants}
+              className="flex gap-4"
+              aria-hidden={false}
+            >
+              {(
+                [
                   {
                     href: "https://twitter.com/yourhandle",
                     label: "Twitter",
@@ -141,11 +143,7 @@ const ContactPage = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<ty
                     href: "https://www.instagram.com/yourhandle",
                     label: "Instagram",
                     icon: (
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="w-5 h-5"
-                      >
+                      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
                         <rect
                           x="3"
                           y="3"
@@ -162,28 +160,32 @@ const ContactPage = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<ty
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         />
-                        <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+                        <circle
+                          cx="17.5"
+                          cy="6.5"
+                          r="0.5"
+                          fill="currentColor"
+                        />
                       </svg>
                     ),
                   },
-                ] as { href: string; label: string; icon: React.ReactNode }[]).map(
-                  (s) => (
-                    <a
-                      key={s.label}
-                      href={s.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={s.label}
-                      className="w-12 h-12 bg-stone-300/50 rounded-full flex items-center justify-center hover:bg-stone-300 transition-colors transform hover:scale-105"
-                    >
-                      <span className="text-zinc-800">{s.icon}</span>
-                    </a>
-                  )
-                )}
-              </motion.div>
-            </motion.section>
-            {/* Right: Map Placeholder */}
-            <motion.section
+                ] as { href: string; label: string; icon: React.ReactNode }[]
+              ).map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="w-12 h-12 bg-stone-300/50 rounded-full flex items-center justify-center hover:bg-stone-300 transition-colors transform hover:scale-105"
+                >
+                  <span className="text-zinc-800">{s.icon}</span>
+                </a>
+              ))}
+            </motion.div>
+          </motion.section>
+          {/* Right: Map Placeholder */}
+          {/* <motion.section
               variants={itemVariants}
               className="bg-zinc-300 w-full h-64 md:h-full min-h-[300px] overflow-hidden"
             >
@@ -196,13 +198,12 @@ const ContactPage = forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<ty
                 width={600}
                 height={400}
               />
-            </motion.section>
-          </div>
-        </motion.main>
-      </motion.div>
-    );
-  }
-);
+            </motion.section> */}
+        </div>
+      </motion.main>
+    </motion.div>
+  );
+});
 
 ContactPage.displayName = "ContactPage";
 export default ContactPage;

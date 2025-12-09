@@ -139,6 +139,7 @@ const MenuItem: React.FC<{
 const MobileMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSnapLogo, setShowSnapLogo] = useState(false);
+  const [showNavOverlay, setShowNavOverlay] = useState(false);
   const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -147,24 +148,38 @@ const MobileMenu: React.FC = () => {
   useEffect(() => {
     let rafId: number | null = null;
     let ticking = false;
-
     function onScroll() {
       const scrollY = window.scrollY;
       if (!ticking) {
         ticking = true;
         rafId = window.requestAnimationFrame(() => {
-          setShowSnapLogo(scrollY > 20);
+          setShowNavOverlay(scrollY > 20);
+          if (pathname === "/") {
+            setShowSnapLogo(scrollY > 20);
+          }
           ticking = false;
         });
       }
     }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (rafId !== null) window.cancelAnimationFrame(rafId);
-    };
-  }, []);
+    if (pathname === "/") {
+      // Home page: snap logo and overlay on scroll
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        if (rafId !== null) window.cancelAnimationFrame(rafId);
+      };
+    } else {
+      // Other pages: snap logo after 3 seconds, overlay on scroll
+      setShowSnapLogo(false);
+      const timer = setTimeout(() => setShowSnapLogo(true), 3000);
+      window.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener("scroll", onScroll);
+        if (rafId !== null) window.cancelAnimationFrame(rafId);
+      };
+    }
+  }, [pathname]);
 
   // Scroll to hash on load
   useEffect(() => {
@@ -208,6 +223,10 @@ const MobileMenu: React.FC = () => {
         </div>
       </Link>
 
+      {/* Top-to-bottom overlay for navbar visibility */}
+      <div
+        className={`fixed top-0 left-0 w-full h-24 z-[29] pointer-events-none transition-opacity duration-500 bg-gradient-to-b from-black/80 via-black/50 to-transparent ${showNavOverlay ? "opacity-100" : "opacity-0"}`}
+      />
       <header className="fixed top-0 left-0 z-[30] p-3 lg:pr-[55px] flex flex-col items-center text-white pointer-events-auto right-0">
         <div className="flex items-center justify-end w-full">
           <div className="flex items-center gap-6">
@@ -267,8 +286,9 @@ const MobileMenu: React.FC = () => {
       <div
         id="logo-gradient-overlay"
         className="inset-0 fixed pointer-events-none"
-        style={{ zIndex: 30 }}
+        style={{ zIndex: 200 }}
       />
+      
 
       <div
         className={`fixed inset-0 transform transition-transform duration-500 ease-in-out ${

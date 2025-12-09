@@ -5,16 +5,7 @@ import { useRouter } from "next/navigation";
 import { db } from "../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowRight,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-// Removed unused import of Project type
-
-// --- TYPE DEFINITIONS ---
-// ...existing code...
+import { ArrowRight, ChevronDown } from "lucide-react";
 
 type Section = "Residential" | "Hospitality" | "Commercial";
 
@@ -103,7 +94,6 @@ const HorizontalProjectScroller: React.FC<{
 
   return (
     <div className="relative group">
-
       {/* Projects Container */}
       <div
         ref={scrollContainerRef}
@@ -134,56 +124,76 @@ const AccordionSection: React.FC<{
   children: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
-}> = ({ title, children, isOpen, onToggle }) => (
-  <div className="border-b border-zinc-800 last:border-b-0">
-    <button
-      onClick={onToggle}
-      className={`flex items-center justify-between w-full py-8 px-0 transition-colors duration-400 group
-        ${isOpen ? "bg-[var(--brown1)]" : "hover:bg-[var(--brown1)]"}`}
-    >
-      <div className="flex sm:flex-row flex-col sm:items-end items-start w-full sm:gap-4 px-8">
-        <span
-          className={`text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-light  text-zinc-200 group-hover:text-black ${
-            isOpen ? "!text-black" : ""
-          }`}
-        >
-          {title}
-        </span>
-        <span
-          className={`text-xl sm:text-2xl md:text-3xl lg:text-3xl font-light text-zinc-400 group-hover:text-black ${
-            isOpen ? "!text-black" : ""
-          } mt-2`}
-        >
-          ({sectionSubNames[title]})
-        </span>
-      </div>
-      <motion.div
-        animate={{ rotate: isOpen ? 180 : 0 }}
-        transition={{ duration: 0.3 }}
+}> = ({ title, children, isOpen, onToggle }) => {
+  const router = useRouter();
+  return (
+    <div className="border-b border-zinc-800 last:border-b-0">
+      <button
+        onClick={onToggle}
+        className={`flex items-center justify-between w-full py-8 px-0 transition-colors duration-400 group
+          ${isOpen ? "bg-[var(--brown1)]" : "hover:bg-[var(--brown1)]"}`}
       >
-        <ChevronDown
-          size={32}
-          className={`transition-colors ${
-            isOpen ? "text-black" : "text-zinc-500"
-          } group-hover:text-black`}
-        />
-      </motion.div>
-    </button>
-    <AnimatePresence>
-      {isOpen && (
+        <div className="flex sm:flex-row flex-col sm:items-end items-start w-full sm:gap-4 px-8">
+          <span
+            className={`text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-light  text-zinc-200 group-hover:text-black ${
+              isOpen ? "!text-black" : ""
+            }`}
+          >
+            {title}
+          </span>
+          <span
+            className={`text-xl sm:text-2xl md:text-3xl lg:text-3xl font-light text-zinc-400 group-hover:text-black ${
+              isOpen ? "!text-black" : ""
+            } mt-2`}
+          >
+            ({sectionSubNames[title]})
+          </span>
+        </div>
+
         <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="overflow-hidden"
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3 }}
         >
-          {children}
+          <ChevronDown
+            size={32}
+            className={`transition-colors ${
+              isOpen ? "text-black" : "text-zinc-500"
+            } group-hover:text-black`}
+          />
         </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
-);
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              {children}
+            </motion.div>
+
+            <div className="w-full flex px-0 pt-2 pb-2">
+              <button
+                className="w-full px-0 py-3 mt-5 text-lg md:text-3xl bg-zinc-900 text-zinc-300 hover:bg-[var(--brown1)] hover:text-black font-light shadow transition-colors border-zinc-700"
+                onClick={() => router.push(`/proposed?category=${title}`)}
+              >
+                Proposed Projects →
+              </button>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <div
+        className="flex-grow border-b border-solid border-[#292929cf] mb-6"
+        aria-hidden="true"
+      ></div>
+    </div>
+  );
+};
 
 // --- MAIN PAGE COMPONENT ---
 export default function ProjectsPage() {
@@ -233,7 +243,11 @@ export default function ProjectsPage() {
     fetchProjects();
 
     // Expose scrollToCategory globally for projectCategories.tsx
-    (window as Window & { scrollToProjectCategory?: (section: Section) => void }).scrollToProjectCategory = (section: Section) => {
+    (
+      window as Window & {
+        scrollToProjectCategory?: (section: Section) => void;
+      }
+    ).scrollToProjectCategory = (section: Section) => {
       setOpenSection(section);
       setTimeout(() => {
         const ref = sectionRefs[section];
@@ -243,7 +257,11 @@ export default function ProjectsPage() {
       }, 100);
     };
     return () => {
-      delete (window as Window & { scrollToProjectCategory?: (section: Section) => void }).scrollToProjectCategory;
+      delete (
+        window as Window & {
+          scrollToProjectCategory?: (section: Section) => void;
+        }
+      ).scrollToProjectCategory;
     };
   }, []);
 
@@ -255,9 +273,10 @@ export default function ProjectsPage() {
     router.push(`/projectShowcase?name=${encodeURIComponent(project.title)}`);
   };
 
+  // ...existing code...
   return (
     <motion.div
-      className="bg-[#0A0A0A] text-white min-h-screen font-sans px-4 sm:px-8 lg:px-16 md:pt-10 lg:pt-20"
+      className="bg-[#0A0A0A] text-white font-sans px-4 sm:px-8 lg:px-16 md:pt-10 lg:pt-20"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}

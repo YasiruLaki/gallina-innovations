@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
@@ -124,9 +125,9 @@ const ProjectShowcaseClient: React.FC = () => {
             <div className="flex-grow border-b border-solid border-gray-500 mb-10 md:mb-0" />
           </div>
 
-          {/* Multi-image view */}
+          {/* True Masonry (Unorganized) Gallery */}
           {project.imageUrls && project.imageUrls.length > 0 && (
-            <div className="w-full  grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="w-full columns-1 sm:columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
               {project.imageUrls.map((url, i) => (
                 <motion.div
                   key={url}
@@ -134,15 +135,17 @@ const ProjectShowcaseClient: React.FC = () => {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.2 }}
-                  className="relative bg-gray-300 aspect-[4/3] overflow-hidden cursor-zoom-in"
+                  className="mb-4 break-inside-avoid cursor-zoom-in relative group"
                   onClick={() => {
                     setCurrentIndex(i);
                     setModalOpen(true);
                   }}
                 >
-                  <div
-                    className="absolute inset-0 bg-center bg-cover"
-                    style={{ backgroundImage: `url(${url})` }}
+                  <img
+                    src={url}
+                    alt={`Project image ${i + 1}`}
+                    className="w-auto max-w-full shadow-lg transition-transform duration-300 group-hover:scale-101"
+                    style={{ display: 'block', width: '100%' }}
                   />
                 </motion.div>
               ))}
