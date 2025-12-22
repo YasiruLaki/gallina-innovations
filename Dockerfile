@@ -1,26 +1,28 @@
-# Use official Node image
-FROM node:20-alpine
+FROM node:22-alpine AS base
 
-# Set working directory
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies first
-COPY package*.json ./
 
-# Install ALL dependencies (including dev)
-RUN npm install
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+RUN npm install --frozen-lockfile || yarn install --frozen-lockfile || pnpm install --frozen-lockfile
 
-# Copy the rest of the project
 COPY . .
 
-# Build the Next.js project
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 RUN npm run build
 
-# Remove dev dependencies for a smaller final image
-RUN npm prune --production
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV production
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json 
 
-# Expose Next.js port
 EXPOSE 3000
-
-# Start the app
-CMD ["npm", "start"]
+CMD ["npx", "next", "start"]
