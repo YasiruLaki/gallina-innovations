@@ -1,38 +1,41 @@
-# name: Deploy Gallina Innovations
+name: Gallina Innovations Pipeline for Next.js App Deployment
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - dev
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-#       - name: Log in to Docker Hub
-#         uses: docker/login-action@v3
-#         with:
-#           username: ${{ secrets.DOCKER_USERNAME }}
-#           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-#       - name: Build image
-#         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/nextapp:latest .
+      - name: Build image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/nextapp:latest .
 
-#       - name: Push image
-#         run: docker push ${{ secrets.DOCKER_USERNAME }}/nextapp:latest
+      - name: Push image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/nextapp:latest
 
-#       - name: Deploy to server
-#         uses: appleboy/ssh-action@v1.2.1
-#         with:
-#           host: ${{ secrets.SERVER_IP }}
-#           username: ${{ secrets.SERVER_USER }}
-#           key: ${{ secrets.SERVER_SSH_KEY }}
-#           script: |
-#             docker pull ${{ secrets.DOCKER_USERNAME }}/nextapp:latest
-#             docker stop nextapp || true
-#             docker rm nextapp || true
-#             docker run -d -p 3000:3000 --name nextapp ${{ secrets.DOCKER_USERNAME }}/nextapp:latest
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/nextapp:latest
+            docker stop nextapp || true
+            docker rm nextapp || true
+            docker run -d -p 3000:3000 --name nextapp ${{ secrets.DOCKER_USERNAME }}/nextapp:latest
