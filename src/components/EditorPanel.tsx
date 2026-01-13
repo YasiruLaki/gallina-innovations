@@ -3,11 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { auth, db } from "../firebaseConfig";
 import {
-  GoogleAuthProvider,
-  signInWithPopup,
   signOut,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { collection, addDoc, doc, getDoc, setDoc } from "firebase/firestore";
 
@@ -23,7 +21,10 @@ type UploadFile = {
 export default function EditorPanel() {
   const [user, setUser] = useState(auth.currentUser);
 
-  // Project form state
+  // Project type toggle
+  const [projectType, setProjectType] = useState<"done" | "proposed">("done");
+
+  // Done project form state
   const [form, setForm] = useState({
     title: "",
     location: "",
@@ -35,22 +36,35 @@ export default function EditorPanel() {
     imageUrls: "",
   });
 
+  // Proposed project form state
+  const [proposedForm, setProposedForm] = useState({
+    title: "",
+    category: categories[0],
+    imageUrls: "",
+  });
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
-  // Project image uploads
+  // Done project image uploads
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Proposed project image uploads
+  const [proposedUploadFiles, setProposedUploadFiles] = useState<UploadFile[]>([]);
+  const proposedFileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Landing slideshow state
   const [landingImages, setLandingImages] = useState<string[]>([]);
   const [landingUploadFiles, setLandingUploadFiles] = useState<UploadFile[]>(
     []
   );
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const landingFileInputRef = useRef<HTMLInputElement | null>(null);
   const [landingLoading, setLandingLoading] = useState(false);
   const [landingError, setLandingError] = useState("");
@@ -80,7 +94,7 @@ export default function EditorPanel() {
   }, []);
 
   // ===== Upload Functions =====
-  const uploadFile = (f: UploadFile, onComplete: (url?: string) => void) => {
+  const uploadFile = (f: UploadFile, onComplete: (url?: string) => void, type: 'done' | 'proposed' | 'landing') => {
     const formData = new FormData();
     formData.append("image", f.file);
 
@@ -90,16 +104,25 @@ export default function EditorPanel() {
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
         const percent = Math.round((event.loaded / event.total) * 100);
-        setUploadFiles((prev) =>
-          prev.map((uf) =>
-            uf.file === f.file ? { ...uf, progress: percent } : uf
-          )
-        );
-        setLandingUploadFiles((prev) =>
-          prev.map((uf) =>
-            uf.file === f.file ? { ...uf, progress: percent } : uf
-          )
-        );
+        if (type === 'done') {
+          setUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, progress: percent } : uf
+            )
+          );
+        } else if (type === 'proposed') {
+          setProposedUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, progress: percent } : uf
+            )
+          );
+        } else if (type === 'landing') {
+          setLandingUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, progress: percent } : uf
+            )
+          );
+        }
       }
     };
 
@@ -107,52 +130,81 @@ export default function EditorPanel() {
       const data = JSON.parse(xhr.responseText);
       if (xhr.status === 200 && data.url) {
         onComplete(data.url);
-        setUploadFiles((prev) =>
-          prev.map((uf) =>
-            uf.file === f.file ? { ...uf, url: data.url, progress: 100 } : uf
-          )
-        );
-        setLandingUploadFiles((prev) =>
-          prev.map((uf) =>
-            uf.file === f.file ? { ...uf, url: data.url, progress: 100 } : uf
-          )
-        );
+        if (type === 'done') {
+          setUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, url: data.url, progress: 100 } : uf
+            )
+          );
+        } else if (type === 'proposed') {
+          setProposedUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, url: data.url, progress: 100 } : uf
+            )
+          );
+        } else if (type === 'landing') {
+          setLandingUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, url: data.url, progress: 100 } : uf
+            )
+          );
+        }
       } else {
         const errMsg = data.error || xhr.statusText || "Upload failed";
+        if (type === 'done') {
+          setUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, error: errMsg, progress: 0 } : uf
+            )
+          );
+        } else if (type === 'proposed') {
+          setProposedUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, error: errMsg, progress: 0 } : uf
+            )
+          );
+        } else if (type === 'landing') {
+          setLandingUploadFiles((prev) =>
+            prev.map((uf) =>
+              uf.file === f.file ? { ...uf, error: errMsg, progress: 0 } : uf
+            )
+          );
+        }
+      }
+    };
+
+    xhr.onerror = () => {
+      if (type === 'done') {
         setUploadFiles((prev) =>
           prev.map((uf) =>
-            uf.file === f.file ? { ...uf, error: errMsg, progress: 0 } : uf
+            uf.file === f.file
+              ? { ...uf, error: "Upload failed", progress: 0 }
+              : uf
           )
         );
+      } else if (type === 'proposed') {
+        setProposedUploadFiles((prev) =>
+          prev.map((uf) =>
+            uf.file === f.file
+              ? { ...uf, error: "Upload failed", progress: 0 }
+              : uf
+          )
+        );
+      } else if (type === 'landing') {
         setLandingUploadFiles((prev) =>
           prev.map((uf) =>
-            uf.file === f.file ? { ...uf, error: errMsg, progress: 0 } : uf
+            uf.file === f.file
+              ? { ...uf, error: "Upload failed", progress: 0 }
+              : uf
           )
         );
       }
     };
 
-    xhr.onerror = () => {
-      setUploadFiles((prev) =>
-        prev.map((uf) =>
-          uf.file === f.file
-            ? { ...uf, error: "Upload failed", progress: 0 }
-            : uf
-        )
-      );
-      setLandingUploadFiles((prev) =>
-        prev.map((uf) =>
-          uf.file === f.file
-            ? { ...uf, error: "Upload failed", progress: 0 }
-            : uf
-        )
-      );
-    };
-
     xhr.send(formData);
   };
 
-  // Handle project files
+  // Handle done project files
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -167,7 +219,26 @@ export default function EditorPanel() {
             return { ...prev, imageUrls: urls.join(",") };
           });
         }
-      })
+      }, 'done')
+    );
+  };
+
+  // Handle proposed project files
+  const handleProposedFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files).map((file) => ({ file, progress: 0 }));
+    setProposedUploadFiles((prev) => [...prev, ...newFiles]);
+    newFiles.forEach((f) =>
+      uploadFile(f, (url) => {
+        if (url) {
+          setProposedForm((prev) => {
+            const urls = [...prev.imageUrls.split(",").filter(Boolean), url];
+            return { ...prev, imageUrls: urls.join(",") };
+          });
+        }
+      }, 'proposed')
     );
   };
 
@@ -175,26 +246,23 @@ export default function EditorPanel() {
     const files = e.target.files;
     if (!files) return;
 
-    const remainingSlots = 5 - landingImages.length - landingUploadFiles.length;
-    if (remainingSlots <= 0) return; // no more files allowed
+    const remainingSlots = 6 - landingImages.length - landingUploadFiles.length;
+    if (remainingSlots <= 0) {
+      setLandingError("Maximum 6 images reached. Delete images to add new ones.");
+      return;
+    }
 
     const newFiles = Array.from(files)
       .slice(0, remainingSlots)
       .map((file) => ({ file, progress: 0 }));
 
     setLandingUploadFiles((prev) => [...prev, ...newFiles]);
+    setLandingError("");
 
     newFiles.forEach((f) => {
       uploadFile(f, (url) => {
-        if (url) {
-          setLandingImages((prev) => [...prev, url]);
-          setLandingUploadFiles((prev) =>
-            prev.map((uf) =>
-              uf.file === f.file ? { ...uf, url, progress: 100 } : uf
-            )
-          );
-        }
-      });
+        // Just update the upload progress, don't add to landingImages yet
+      }, 'landing');
     });
   };
 
@@ -203,15 +271,56 @@ export default function EditorPanel() {
     setLandingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Drag handlers for reordering
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (targetIndex: number) => {
+    if (draggedIndex === null || draggedIndex === targetIndex) return;
+    
+    const newImages = [...landingImages];
+    const draggedImage = newImages[draggedIndex];
+    newImages.splice(draggedIndex, 1);
+    newImages.splice(targetIndex, 0, draggedImage);
+    setLandingImages(newImages);
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   // Save landing images to Firestore
   const handleSaveLandingImages = async () => {
     setLandingLoading(true);
     setLandingError("");
     setLandingSuccess("");
     try {
+      // Get all uploaded URLs from landingUploadFiles
+      const newUploadedUrls = landingUploadFiles
+        .filter((f) => f.url)
+        .map((f) => f.url!);
+
+      // Merge existing images with newly uploaded ones, maintaining order
+      const updatedImages = [...landingImages, ...newUploadedUrls].slice(0, 6);
+
       const ref = doc(db, "siteSettings", "landing");
-      await setDoc(ref, { images: landingImages });
-      setLandingSuccess("Landing images saved!");
+      await setDoc(ref, { images: updatedImages }, { merge: false }); // Rewrite the entire array
+      
+      // Update local state with the saved images
+      setLandingImages(updatedImages);
+      setLandingUploadFiles([]); // Clear upload files after saving
+      if (landingFileInputRef.current) {
+        landingFileInputRef.current.value = ""; // Reset file input
+      }
+      
+      setLandingSuccess("Landing images saved successfully!");
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'message' in err) {
         setLandingError((err as { message?: string }).message || "Failed to save landing images");
@@ -224,34 +333,43 @@ export default function EditorPanel() {
   };
 
   // ===== Auth Handlers =====
-  const handleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-    } catch (err: unknown) {
-      if (typeof err === 'object' && err !== null && 'message' in err) {
-        setError((err as { message?: string }).message || "Sign in failed");
-      } else {
-        setError("Sign in failed");
-      }
-    }
-  };
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
     try {
-      const result = isSignUp
-        ? await createUserWithEmailAndPassword(auth, email, password)
-        : await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
       setUser(result.user);
+      setSuccess("Logged in successfully!");
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'message' in err) {
-        setError((err as { message?: string }).message || "Auth failed");
+        setError((err as { message?: string }).message || "Login failed");
       } else {
-        setError("Auth failed");
+        setError("Login failed");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setSuccess("Password reset email sent! Check your inbox.");
+      setResetEmail("");
+      setTimeout(() => {
+        setShowResetPassword(false);
+      }, 2000);
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError((err as { message?: string }).message || "Failed to send reset email");
+      } else {
+        setError("Failed to send reset email");
       }
     } finally {
       setLoading(false);
@@ -269,6 +387,14 @@ export default function EditorPanel() {
     >
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleProposedChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement
+    >
+  ) => {
+    setProposedForm({ ...proposedForm, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -323,241 +449,609 @@ export default function EditorPanel() {
     }
   };
 
+  const handleProposedSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const imageUrlsArr = proposedForm.imageUrls
+        .split(",")
+        .map((u) => u.trim())
+        .filter(Boolean);
+
+      await addDoc(collection(db, "proposed"), {
+        title: proposedForm.title,
+        category: proposedForm.category,
+        imageUrls: imageUrlsArr,
+        createdBy: user?.email || "anonymous",
+        createdAt: new Date().toISOString(),
+      });
+
+      setSuccess("Proposed project added successfully!");
+      setProposedForm({
+        title: "",
+        category: categories[0],
+        imageUrls: "",
+      });
+      setProposedUploadFiles([]);
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'message' in err) {
+        setError((err as { message?: string }).message || 'Proposed project add failed');
+      } else {
+        setError('Proposed project add failed');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black">
-        <div className="w-full max-w-sm bg-zinc-900 rounded-xl shadow-lg p-8 flex flex-col items-center">
-          <h2 className="text-3xl mb-6 text-white">Editor Login</h2>
-          <form
-            onSubmit={handleEmailAuth}
-            className="flex flex-col gap-4 w-full"
-          >
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-              required
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-              required
-            />
-            <button
-              type="submit"
-              className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
-              disabled={loading}
-            >
-              {loading
-                ? isSignUp
-                  ? "Signing up..."
-                  : "Logging in..."
-                : isSignUp
-                ? "Sign Up"
-                : "Log In"}
-            </button>
-          </form>
-          <button
-            onClick={handleSignIn}
-            className="mt-6 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 w-full"
-          >
-            Sign in with Google
-          </button>
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="mt-4 text-sm text-blue-400 underline"
-          >
-            {isSignUp
-              ? "Already have an account? Log In"
-              : "Don't have an account? Sign Up"}
-          </button>
-          {error && (
-            <p className="text-red-500 mt-4 w-full text-center">{error}</p>
-          )}
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black px-4">
+        <div className="w-full max-w-md">
+          {/* Logo/Header */}
+          <div className="text-center mb-8">
+            <div className="inline-block p-4 bg-zinc-800 rounded-2xl mb-4 shadow-2xl">
+              <span className="text-4xl">🔐</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">Admin Login</h2>
+            <p className="text-zinc-400 text-sm">Sign in to access the admin panel</p>
+          </div>
+
+          {/* Login Card */}
+          <div className="bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 border border-zinc-800">
+            {!showResetPassword ? (
+              <>
+                <form onSubmit={handleEmailAuth} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Email</label>
+                    <input
+                      type="email"
+                      placeholder="admin@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Password</label>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 sm:py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105"
+                    disabled={loading}
+                  >
+                    {loading ? "⏳ Logging in..." : "🔓 Log In"}
+                  </button>
+                </form>
+
+                <button
+                  onClick={() => {
+                    setShowResetPassword(true);
+                    setError("");
+                    setSuccess("");
+                  }}
+                  className="mt-6 w-full text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200 underline"
+                >
+                  Forgot Password?
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setShowResetPassword(false);
+                    setError("");
+                    setSuccess("");
+                    setResetEmail("");
+                  }}
+                  className="mb-4 text-sm text-zinc-400 hover:text-white transition-colors duration-200 flex items-center gap-2"
+                >
+                  ← Back to Login
+                </button>
+                
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <p className="text-sm text-zinc-400 mb-4">
+                    Enter your email address and we'll send you a link to reset your password.
+                  </p>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="admin@example.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 sm:py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105"
+                    disabled={loading}
+                  >
+                    {loading ? "⏳ Sending..." : "📧 Send Reset Link"}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {error && (
+              <div className="mt-4 p-4 bg-red-400/10 border border-red-400/20 rounded-xl text-red-400 text-sm text-center animate-pulse">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mt-4 p-4 bg-green-400/10 border border-green-400/20 rounded-xl text-green-400 text-sm text-center">
+                {success}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-6 text-xs text-zinc-500">
+            Protected Admin Area • Gallina Innovations
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="w-full max-w-full bg-zinc-900 rounded-xl shadow-lg p-10">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-4xl font-bold text-white">Add New Project</h2>
-          <button
-            onClick={handleSignOut}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-black"
-          >
-            Sign Out
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black py-4 px-4 sm:py-8 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6 border border-zinc-800">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1">Admin Panel</h2>
+              <p className="text-sm text-zinc-400">Manage projects and content</p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
 
-        <div className="flex md:flex-row-reverse gap-10">
-          {/* Landing Slideshow Panel */}
-          <div className="mb-10 p-6 rounded-xl bg-zinc-800 border border-zinc-700">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Landing Slideshow Images
-            </h3>
-            <div className="flex flex-wrap gap-4 mb-4">
-              {landingImages.map((url, idx) => (
-                <div
-                  key={url + idx}
-                  className="w-28 h-28 bg-zinc-900 rounded overflow-hidden flex items-center justify-center border border-zinc-700 relative"
-                >
-                  <img
-                    src={url}
-                    alt={`landing-${idx}`}
-                    className="object-cover w-full h-full"
-                  />
-                  <button
-                    onClick={() => handleRemoveLandingImage(idx)}
-                    className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1 rounded hover:bg-red-700"
-                  >
-                    X
-                  </button>
-                  <span className="absolute top-1 left-1 bg-black/60 text-xs text-white px-2 py-0.5 rounded">
-                    {idx + 1}
-                  </span>
-                </div>
-              ))}
+        {/* Project Type Toggle */}
+        <div className="bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6 border border-zinc-800">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <span className="text-white font-semibold text-sm sm:text-base">Project Type:</span>
+            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+              <button
+                onClick={() => setProjectType("done")}
+                className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-all duration-300 transform text-sm sm:text-base ${
+                  projectType === "done"
+                    ? "bg-green-600 text-white shadow-lg shadow-green-600/50 scale-105"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                Done Project
+              </button>
+              <button
+                onClick={() => setProjectType("proposed")}
+                className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-all duration-300 transform text-sm sm:text-base ${
+                  projectType === "proposed"
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/50 scale-105"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                Proposed Project
+              </button>
             </div>
+          </div>
+        </div>
 
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              ref={landingFileInputRef}
-              onChange={handleLandingFileChange}
-              className="block w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 mb-2"
-              disabled={landingLoading}
-            />
-            {landingImages.length + landingUploadFiles.length >= 5 && (
-              <div className="text-yellow-400 text-xs mt-1">
-                Max 5 images reached. New uploads will replace images from the
-                start.
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+          {/* Landing Slideshow Panel */}
+          <div className="lg:w-80 xl:w-96 order-first lg:order-last">
+            <div className="bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 border border-zinc-800 sticky top-4">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
+                Landing Slideshow
+              </h3>
+              
+              {/* Image Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 mb-4">
+                {/* Existing saved images */}
+                {landingImages.map((url, idx) => (
+                  <div
+                    key={url + idx}
+                    draggable
+                    onDragStart={() => handleDragStart(idx)}
+                    onDragOver={handleDragOver}
+                    onDrop={() => handleDrop(idx)}
+                    onDragEnd={handleDragEnd}
+                    className={`aspect-square bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center border border-zinc-700 relative group transition-all duration-200 ${
+                      draggedIndex === idx
+                        ? "opacity-50 scale-95 border-yellow-500"
+                        : "hover:scale-105 cursor-move"
+                    }`}
+                  >
+                    <img
+                      src={url}
+                      alt={`landing-${idx}`}
+                      className="object-cover w-full h-full pointer-events-none"
+                    />
+                    <button
+                      onClick={() => handleRemoveLandingImage(idx)}
+                      className="absolute top-2 right-2 bg-red-600 text-white text-xs p-1.5 rounded-lg hover:bg-red-700 transition-all duration-200 opacity-0 group-hover:opacity-100 shadow-lg"
+                    >
+                      ✕
+                    </button>
+                    <span className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-xs text-white px-2 py-1 rounded-lg font-medium">
+                      {idx + 1}
+                    </span>
+                    <span className="absolute bottom-2 left-2 bg-blue-600/80 backdrop-blur-sm text-xs text-white px-2 py-1 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      🔄 Drag
+                    </span>
+                  </div>
+                ))}
+                {/* Uploading files preview */}
+                {landingUploadFiles.map((f, idx) => (
+                  <div
+                    key={f.file.name + idx}
+                    className="aspect-square bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center border border-yellow-600 relative group transition-transform duration-200"
+                  >
+                    <img
+                      src={URL.createObjectURL(f.file)}
+                      alt={f.file.name}
+                      className="object-cover w-full h-full"
+                    />
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {f.error ? "❌" : f.url ? "✓" : `${f.progress}%`}
+                      </span>
+                    </div>
+                    <span className="absolute top-2 left-2 bg-yellow-600/90 backdrop-blur-sm text-xs text-white px-2 py-1 rounded-lg font-medium">
+                      {landingImages.length + idx + 1}
+                    </span>
+                  </div>
+                ))}
               </div>
-            )}
-            <button
-              type="button"
-              onClick={handleSaveLandingImages}
-              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-2"
-              disabled={
-                landingLoading || landingUploadFiles.some((f) => !f.url)
-              }
-            >
-              {landingLoading ? "Saving..." : "Save Slideshow Images"}
-            </button>
-            {landingError && (
-              <div className="text-red-400 mt-2">{landingError}</div>
-            )}
-            {landingSuccess && (
-              <div className="text-green-400 mt-2">{landingSuccess}</div>
-            )}
-            <div className="text-xs text-zinc-400 mt-2">
-              Max 5 images. New uploads replace from the start.
+
+              {/* File Input */}
+              <div className="mb-4">
+                {landingImages.length + landingUploadFiles.length >= 6 ? (
+                  <div className="border-2 border-dashed border-red-500/50 rounded-xl p-4 text-center bg-red-500/5">
+                    <div className="text-red-400 text-sm">
+                      <span className="block mb-1 text-lg">🚫</span>
+                      <span className="block font-medium">Maximum 6 images reached</span>
+                      <span className="block text-xs mt-1">Delete one or more images to add new ones</span>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="block w-full cursor-pointer">
+                    <div className="border-2 border-dashed border-zinc-700 rounded-xl p-4 hover:border-green-600 transition-colors duration-200 text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        ref={landingFileInputRef}
+                        onChange={handleLandingFileChange}
+                        className="hidden"
+                        disabled={landingLoading}
+                      />
+                      <div className="text-zinc-400 text-sm">
+                        <span className="block mb-1">📁</span>
+                        <span className="block font-medium">Click to upload images</span>
+                        <span className="block text-xs mt-1">
+                          {6 - landingImages.length - landingUploadFiles.length} slot(s) available
+                        </span>
+                      </div>
+                    </div>
+                  </label>
+                )}
+              </div>
+
+              {/* Save Button */}
+              <button
+                type="button"
+                onClick={handleSaveLandingImages}
+                disabled={landingLoading || landingUploadFiles.some((f) => !f.url)}
+                className="w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 text-sm sm:text-base"
+              >
+                {landingLoading ? "Saving..." : "💾 Save Slideshow"}
+              </button>
+
+              {/* Messages */}
+              {landingError && (
+                <div className="mt-3 text-red-400 text-xs bg-red-400/10 p-3 rounded-lg animate-pulse">
+                  ❌ {landingError}
+                </div>
+              )}
+              {landingSuccess && (
+                <div className="mt-3 text-green-400 text-xs bg-green-400/10 p-3 rounded-lg">
+                  ✓ {landingSuccess}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Project Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Project Title"
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-              required
-            />
-            <input
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-              placeholder="Project Location"
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-              required
-            />
-            <input
-              name="tags"
-              value={form.tags}
-              onChange={handleChange}
-              placeholder="Tags (comma separated)"
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-            />
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Project Description"
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-              rows={3}
-            />
-            <textarea
-              name="approach"
-              value={form.approach}
-              onChange={handleChange}
-              placeholder="Project Approach"
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-              rows={2}
-            />
-            <input
-              name="catchline"
-              value={form.catchline}
-              onChange={handleChange}
-              placeholder="Project Catchline"
-              className="w-full p-3 border border-zinc-700 rounded bg-zinc-800 text-white placeholder-zinc-400"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="block w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-            />
-            <div className="flex flex-wrap gap-2">
-              {uploadFiles.map((f, idx) => (
-                <div
-                  key={f.file.name + idx}
-                  className="w-24 h-24 bg-zinc-800 rounded overflow-hidden flex items-center justify-center border border-zinc-700 relative"
-                >
-                  <img
-                    src={f.url || URL.createObjectURL(f.file)}
-                    alt={f.file.name}
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute bottom-0 w-full text-center text-xs text-white bg-black/50">
-                    {f.error ? "Error" : `${f.progress}%`}
+          {/* Main Form Content */}
+          <div className="flex-1">
+            {projectType === "done" ? (
+              <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-zinc-800">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Add Done Project</h3>
+                
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Project Title *</label>
+                    <input
+                      name="title"
+                      value={form.title}
+                      onChange={handleChange}
+                      placeholder="Enter project title"
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                      required
+                    />
                   </div>
+
+                  {/* Location and Category Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-2">Location *</label>
+                      <input
+                        name="location"
+                        value={form.location}
+                        onChange={handleChange}
+                        placeholder="Project location"
+                        className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-2">Category *</label>
+                      <select
+                        name="category"
+                        value={form.category}
+                        onChange={handleChange}
+                        className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                      >
+                        {categories.map((cat) => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Tags</label>
+                    <input
+                      name="tags"
+                      value={form.tags}
+                      onChange={handleChange}
+                      placeholder="tag1, tag2, tag3"
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    />
+                  </div>
+
+                  {/* Catchline */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Catchline</label>
+                    <input
+                      name="catchline"
+                      value={form.catchline}
+                      onChange={handleChange}
+                      placeholder="Brief project catchline"
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Description</label>
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      placeholder="Detailed project description"
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 resize-none text-sm sm:text-base"
+                      rows={4}
+                    />
+                  </div>
+
+                  {/* Approach */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Approach</label>
+                    <textarea
+                      name="approach"
+                      value={form.approach}
+                      onChange={handleChange}
+                      placeholder="Project approach and methodology"
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 resize-none text-sm sm:text-base"
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* File Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Project Images</label>
+                    <label className="block cursor-pointer">
+                      <div className="border-2 border-dashed border-zinc-700 rounded-xl p-6 hover:border-green-600 transition-colors duration-200 text-center bg-zinc-800/30">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <div className="text-zinc-400 text-sm">
+                          <span className="block text-2xl mb-2">📸</span>
+                          <span className="block font-medium">Click to upload images</span>
+                          <span className="block text-xs mt-1">Multiple files supported</span>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Image Preview Grid */}
+                  {uploadFiles.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                      {uploadFiles.map((f, idx) => (
+                        <div
+                          key={f.file.name + idx}
+                          className="aspect-square bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center border border-zinc-700 relative group"
+                        >
+                          <img
+                            src={f.url || URL.createObjectURL(f.file)}
+                            alt={f.file.name}
+                            className="object-cover w-full h-full"
+                          />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">
+                              {f.error ? "❌" : `${f.progress}%`}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 sm:py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 text-sm sm:text-base"
+                  >
+                    {loading ? "⏳ Saving..." : "💾 Save Done Project"}
+                  </button>
+
+                  {/* Messages */}
+                  {error && (
+                    <div className="text-red-400 text-sm bg-red-400/10 p-4 rounded-xl animate-pulse">
+                      ❌ {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="text-green-400 text-sm bg-green-400/10 p-4 rounded-xl">
+                      ✓ {success}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              {loading ? "Saving..." : "Save Project"}
-            </button>
-            {error && <div className="text-red-400 mt-2">{error}</div>}
-            {success && <div className="text-green-400 mt-2">{success}</div>}
-          </form>
+              </form>
+            ) : (
+              <form onSubmit={handleProposedSubmit} className="bg-zinc-900/80 backdrop-blur-sm rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-8 border border-zinc-800">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Add Proposed Project</h3>
+                
+                <div className="space-y-4">
+                  {/* Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Project Title *</label>
+                    <input
+                      name="title"
+                      value={proposedForm.title}
+                      onChange={handleProposedChange}
+                      placeholder="Enter proposed project title"
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                      required
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Category *</label>
+                    <select
+                      name="category"
+                      value={proposedForm.category}
+                      onChange={handleProposedChange}
+                      className="w-full p-3 sm:p-4 border border-zinc-700 rounded-xl bg-zinc-800/50 text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* File Upload */}
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-2">Project Images</label>
+                    <label className="block cursor-pointer">
+                      <div className="border-2 border-dashed border-zinc-700 rounded-xl p-6 hover:border-blue-600 transition-colors duration-200 text-center bg-zinc-800/30">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          ref={proposedFileInputRef}
+                          onChange={handleProposedFileChange}
+                          className="hidden"
+                        />
+                        <div className="text-zinc-400 text-sm">
+                          <span className="block text-2xl mb-2">📸</span>
+                          <span className="block font-medium">Click to upload images</span>
+                          <span className="block text-xs mt-1">Multiple files supported</span>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Image Preview Grid */}
+                  {proposedUploadFiles.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                      {proposedUploadFiles.map((f, idx) => (
+                        <div
+                          key={f.file.name + idx}
+                          className="aspect-square bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center border border-zinc-700 relative group"
+                        >
+                          <img
+                            src={f.url || URL.createObjectURL(f.file)}
+                            alt={f.file.name}
+                            className="object-cover w-full h-full"
+                          />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">
+                              {f.error ? "❌" : `${f.progress}%`}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 sm:py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 text-sm sm:text-base"
+                  >
+                    {loading ? "⏳ Saving..." : "💾 Save Proposed Project"}
+                  </button>
+
+                  {/* Messages */}
+                  {error && (
+                    <div className="text-red-400 text-sm bg-red-400/10 p-4 rounded-xl animate-pulse">
+                      ❌ {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="text-green-400 text-sm bg-green-400/10 p-4 rounded-xl">
+                      ✓ {success}
+                    </div>
+                  )}
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
