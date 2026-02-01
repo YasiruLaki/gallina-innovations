@@ -82,9 +82,9 @@ const ContactPage = forwardRef<
                 phone="+94 76 761 8415"
               />
               <ContactDetail
-                label="CEO"
+                label=""
                 email="thishyankya@gallinainnovations.com"
-                phone="+94 77 902 9168 (Thishyankya)"
+                phone="+94 77 902 9168"
               />
               <motion.div variants={itemVariants}>
                 <p className="text-zinc-400">Address</p>
@@ -100,34 +100,34 @@ const ContactPage = forwardRef<
             >
               {(
                 [
+                  // {
+                  //   href: "https://twitter.com/yourhandle",
+                  //   label: "Twitter",
+                  //   icon: (
+                  //     <svg
+                  //       viewBox="0 0 24 24"
+                  //       fill="currentColor"
+                  //       className="w-5 h-5"
+                  //     >
+                  //       <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 0 0 1.88-2.37 8.6 8.6 0 0 1-2.72 1.04 4.28 4.28 0 0 0-7.3 3.9A12.14 12.14 0 0 1 3.15 4.6a4.28 4.28 0 0 0 1.32 5.72 4.2 4.2 0 0 1-1.94-.54v.05a4.28 4.28 0 0 0 3.43 4.19 4.3 4.3 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.97A8.6 8.6 0 0 1 2 19.54 12.12 12.12 0 0 0 8.29 21c7.55 0 11.68-6.26 11.68-11.68l-.01-.53A8.36 8.36 0 0 0 22.46 6z" />
+                  //     </svg>
+                  //   ),
+                  // },
+                  // {
+                  //   href: "https://www.linkedin.com/company/yourcompany",
+                  //   label: "LinkedIn",
+                  //   icon: (
+                  //     <svg
+                  //       viewBox="0 0 24 24"
+                  //       fill="currentColor"
+                  //       className="w-5 h-5"
+                  //     >
+                  //       <path d="M4.98 3.5a2.5 2.5 0 1 1 .001 5.001A2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.6h.1c.5-.9 1.7-1.8 3.5-1.8 3.7 0 4.4 2.4 4.4 5.5V21H17v-5.4c0-1.3 0-3-1.9-3-1.9 0-2.2 1.5-2.2 2.9V21H9z" />
+                  //     </svg>
+                  //   ),
+                  // },
                   {
-                    href: "https://twitter.com/yourhandle",
-                    label: "Twitter",
-                    icon: (
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-5 h-5"
-                      >
-                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 0 0 1.88-2.37 8.6 8.6 0 0 1-2.72 1.04 4.28 4.28 0 0 0-7.3 3.9A12.14 12.14 0 0 1 3.15 4.6a4.28 4.28 0 0 0 1.32 5.72 4.2 4.2 0 0 1-1.94-.54v.05a4.28 4.28 0 0 0 3.43 4.19 4.3 4.3 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.97A8.6 8.6 0 0 1 2 19.54 12.12 12.12 0 0 0 8.29 21c7.55 0 11.68-6.26 11.68-11.68l-.01-.53A8.36 8.36 0 0 0 22.46 6z" />
-                      </svg>
-                    ),
-                  },
-                  {
-                    href: "https://www.linkedin.com/company/yourcompany",
-                    label: "LinkedIn",
-                    icon: (
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-5 h-5"
-                      >
-                        <path d="M4.98 3.5a2.5 2.5 0 1 1 .001 5.001A2.5 2.5 0 0 1 4.98 3.5zM3 9h4v12H3zM9 9h3.8v1.6h.1c.5-.9 1.7-1.8 3.5-1.8 3.7 0 4.4 2.4 4.4 5.5V21H17v-5.4c0-1.3 0-3-1.9-3-1.9 0-2.2 1.5-2.2 2.9V21H9z" />
-                      </svg>
-                    ),
-                  },
-                  {
-                    href: "https://www.facebook.com/yourpage",
+                    href: "https://www.facebook.com/profile.php?id=61586301981343",
                     label: "Facebook",
                     icon: (
                       <svg
@@ -140,7 +140,7 @@ const ContactPage = forwardRef<
                     ),
                   },
                   {
-                    href: "https://www.instagram.com/yourhandle",
+                    href: "https://www.instagram.com/gallinainnovations/?hl=en",
                     label: "Instagram",
                     icon: (
                       <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
