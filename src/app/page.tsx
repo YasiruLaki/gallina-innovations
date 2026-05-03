@@ -12,6 +12,7 @@ import ProjectsPage from "@/components/projects";
 import ContactPage from "@/components/contactUs";
 import CopyrightFooter from "@/components/footer";
 import FeaturedProjectSection, { FirestoreProject } from "@/components/FeaturedProjectSection";
+import PhilosophyStrip from "@/components/PhilosophyStrip";
 
 export default function Home() {
     // SEO meta tags for homepage
@@ -58,6 +59,7 @@ export default function Home() {
       <MobileMenu />
       <Landing />
       {/* <AboutIntro /> */}
+      <PhilosophyStrip />
       <ProjectCategories />
       <ProjectsPage />
       {/* Featured Project Section */}
