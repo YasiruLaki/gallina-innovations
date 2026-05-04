@@ -65,10 +65,10 @@ const ContactPage = forwardRef<
         {/* Header */}
         <motion.header variants={itemVariants} className="mb-16">
           <h1 className="text-6xl md:text-8xl font-medium tracking-tighter">
-            Explore Our Work
+            Start a project
           </h1>
-          <p className="text-zinc-400 mt-2 text-lg">
-            Get in touch with us for any inquiries & quotations
+          <p className="text-zinc-400 mt-2 text-lg max-w-2xl">
+            A 30-minute conversation, no fee, no obligation. We&apos;ll discuss your site, your brief, and whether we&apos;re the right practice for your project.
           </p>
         </motion.header>
         {/* Content Grid */}
@@ -82,7 +82,7 @@ const ContactPage = forwardRef<
                 phone="+94 76 761 8415"
               />
               <ContactDetail
-                label=""
+                label="Project Enquiries"
                 email="thishyankya@gallinainnovations.com"
                 phone="+94 77 902 9168"
               />
@@ -93,6 +93,9 @@ const ContactPage = forwardRef<
                 </p>
               </motion.div>
             </div>
+            <motion.div variants={itemVariants} className="space-y-4">
+              <p className="text-zinc-400 text-sm tracking-widest uppercase">Follow the studio on</p>
+            </motion.div>
             <motion.div
               variants={itemVariants}
               className="flex gap-4"

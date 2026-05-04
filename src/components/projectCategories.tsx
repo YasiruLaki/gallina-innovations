@@ -1,6 +1,7 @@
 "use client";
 
 import type { FC } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
@@ -8,7 +9,7 @@ const categories = [
   {
     name: "Residential",
     subName: "Landscape",
-    href: "#",
+    href: "/projects/residential",
     bgImage: "https://cdn.gallinainnovations.com/uploads/PHOTO-2025-10-08-11-45-41_2_Cover.jpg",
     bgColor: "neutral-500",
     textColor: "text-white",
@@ -18,7 +19,7 @@ const categories = [
   {
     name: "Hospitality",
     subName: "Hotels & Villas",
-    href: "#",
+    href: "/projects/hospitality",
     bgImage: "https://cdn.gallinainnovations.com/uploads/landing-9.jpg",
     bgColor: "neutral-500",
     textColor: "text-white",
@@ -28,7 +29,7 @@ const categories = [
   {
     name: "Commercial",
     subName: "Industrial",
-    href: "#",
+    href: "/projects/commercial",
     bgImage: "https://cdn.gallinainnovations.com/uploads/mr.%20mendis%20%20%2812%29.JPEG",
     bgColor: "neutral-500",
     textColor: "text-white",
@@ -49,27 +50,20 @@ const SlidingProjectsSection: FC = () => {
       <motion.section
         className="sticky top-0 flex h-screen w-full flex-col overflow-hidden md:flex-row"
       >
-        {categories.map((category) => {
-          // Map display name to Section type for scroll
-          let sectionName: string = category.name;
-          if (sectionName === "Commercial") sectionName = "Commercial";
-          if (sectionName === "Residential") sectionName = "Residential";
-          if (sectionName === "Landscape") sectionName = "Residential";
-          if (sectionName === "Hospitality") sectionName = "Hospitality"; // fallback or adjust as needed
-
-          return (
+        {categories.map((category) => (
+          <Link
+            key={category.name}
+            href={category.href}
+            className={`group relative flex flex-1 flex-col md:items-center justify-between p-8 transition-colors duration-300 ease-in-out ${category.textColor} no-underline`}
+          >
             <motion.div
-              key={category.name}
               whileHover="hover"
               initial="rest"
               animate="rest"
               variants={{}}
-              className={`group relative flex flex-1 flex-col md:items-center justify-between p-8 transition-colors duration-300 ease-in-out ${category.textColor}`}
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                (window as Window & { scrollToProjectCategory?: (section: string) => void }).scrollToProjectCategory?.(sectionName);
-              }}
+              className="absolute inset-0"
             >
+              {/* Background image */}
               <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{
@@ -85,7 +79,7 @@ const SlidingProjectsSection: FC = () => {
               <motion.div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: category.bgColor.startsWith('neutral') ? 'var(--brown2)' : 'rgba(0,0,0,0.7)',
+                  background: 'var(--brown2)',
                 }}
                 variants={{
                   rest: { y: '100%', opacity: 0.6 },
@@ -93,36 +87,38 @@ const SlidingProjectsSection: FC = () => {
                 }}
                 transition={{ duration: 0.5 }}
               />
-
-              {/* content above overlay */}
-              <div className="relative z-10 flex flex-1 w-full flex-col items-center justify-between"></div>
-              <div
-                className={`
-                  absolute inset-x-8 md:top-1/2 md:-translate-y-1/2 z-10 flex flex-col
-                  md:[writing-mode:vertical-rl] md:rotate-180
-                  ${category.textColor}
-                  tracking-tight drop-shadow-2xl gap-2
-                `}
-              >
-                <span className="text-5xl font-medium md:text-8xl">{category.name}</span>
-                <span className="md:mt-2 text-2xl md:text-5xl font-light opacity-70 text-left">{category.subName}</span>
-              </div>
-              <div
-                className={`
-                  flex h-16 w-16 items-center justify-center rounded-full border 
-                  transition-transform duration-300 group-hover:scale-105
-                  md:h-25 md:w-25 bg-black/20
-                  ${category.borderColor}
-                `}
-              >
-                <ArrowRight
-                  size={50}
-                  strokeWidth={1}
-                />
-              </div>
             </motion.div>
-          );
-        })}
+
+            {/* Category text — vertical on desktop */}
+            <div
+              className={`
+                absolute inset-x-8 md:top-1/2 md:-translate-y-1/2 z-10 flex flex-col
+                md:[writing-mode:vertical-rl] md:rotate-180
+                ${category.textColor}
+                tracking-tight drop-shadow-2xl gap-2
+                group-hover:text-black transition-colors duration-500
+              `}
+            >
+              <span className="text-5xl font-medium md:text-8xl">{category.name}</span>
+              <span className="md:mt-2 text-2xl md:text-5xl font-light opacity-70 text-left group-hover:opacity-90">{category.subName}</span>
+            </div>
+
+            {/* View Projects button */}
+            <div className="relative z-10 mt-auto self-end md:self-auto">
+              <div
+                className={`
+                  flex items-center gap-2.5 border rounded-full px-5 py-2.5
+                  transition-all duration-500
+                  border-white/30 text-white
+                  group-hover:border-black group-hover:text-black group-hover:bg-transparent
+                `}
+              >
+                <span className="text-xs tracking-[0.18em] uppercase font-light whitespace-nowrap">View Projects</span>
+                <ArrowRight size={12} strokeWidth={1.5} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+              </div>
+            </div>
+          </Link>
+        ))}
       </motion.section>
     </motion.div>
   );

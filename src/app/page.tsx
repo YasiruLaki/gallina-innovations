@@ -8,11 +8,11 @@ import CustomCursor from "@/components/CustomCursor";
 import MobileMenu from "@/components/MobileMenu";
 import Landing from "@/components/Landing";
 import ProjectCategories from "@/components/projectCategories";
-import ProjectsPage from "@/components/projects";
 import ContactPage from "@/components/contactUs";
 import CopyrightFooter from "@/components/footer";
 import FeaturedProjectSection, { FirestoreProject } from "@/components/FeaturedProjectSection";
 import PhilosophyStrip from "@/components/PhilosophyStrip";
+import HowWeWork from "@/components/HowWeWork";
 
 export default function Home() {
     // SEO meta tags for homepage
@@ -61,9 +61,9 @@ export default function Home() {
       {/* <AboutIntro /> */}
       <PhilosophyStrip />
       <ProjectCategories />
-      <ProjectsPage />
       {/* Featured Project Section */}
       {featured && <FeaturedProjectSection featured={featured} />}
+      <HowWeWork />
       <ContactPage />
       <CopyrightFooter />
     </div>
