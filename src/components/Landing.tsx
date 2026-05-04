@@ -75,7 +75,7 @@ export default function Landing() {
   useEffect(() => {
     const id = setInterval(() => {
       setSlideIndex((s) => (s + 1) % slides.length);
-    }, 1500); // 1.5s per slide
+    }, 5000); // 5s per slide
     return () => clearInterval(id);
   }, [slides.length]);
 

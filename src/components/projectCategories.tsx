@@ -2,6 +2,7 @@
 
 import type { FC } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
@@ -10,62 +11,56 @@ const categories = [
     name: "Residential",
     subName: "Landscape",
     href: "/projects/residential",
-    bgImage: "https://cdn.gallinainnovations.com/uploads/PHOTO-2025-10-08-11-45-41_2_Cover.jpg",
-    bgColor: "neutral-500",
-    textColor: "text-white",
-    borderColor: "border-white/30",
-    hoverBgColor: "hover:bg-white",
+    bgImage:
+      "https://cdn.gallinainnovations.com/uploads/PHOTO-2025-10-08-11-45-41_2_Cover.jpg",
   },
   {
     name: "Hospitality",
     subName: "Hotels & Villas",
     href: "/projects/hospitality",
     bgImage: "https://cdn.gallinainnovations.com/uploads/landing-9.jpg",
-    bgColor: "neutral-500",
-    textColor: "text-white",
-    borderColor: "border-white/30",
-    hoverBgColor: "hover:bg-white/5",
   },
   {
     name: "Commercial",
     subName: "Industrial",
     href: "/projects/commercial",
-    bgImage: "https://cdn.gallinainnovations.com/uploads/mr.%20mendis%20%20%2812%29.JPEG",
-    bgColor: "neutral-500",
-    textColor: "text-white",
-    borderColor: "border-white/30",
-    hoverBgColor: "hover:bg-white",
+    bgImage:
+      "https://cdn.gallinainnovations.com/uploads/mr.%20mendis%20%20%2812%29.JPEG",
   },
 ];
 
 const SlidingProjectsSection: FC = () => {
+  const [active, setActive] = useState<number | null>(null);
+
   return (
     <motion.div
       className="relative lg:h-[120vh]"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      <motion.section
-        className="sticky top-0 flex h-screen w-full flex-col overflow-hidden md:flex-row"
-      >
-        {categories.map((category) => (
-          <Link
-            key={category.name}
-            href={category.href}
-            className={`group relative flex flex-1 flex-col md:items-center justify-between p-8 transition-colors duration-300 ease-in-out ${category.textColor} no-underline`}
-          >
-            <motion.div
-              whileHover="hover"
-              initial="rest"
-              animate="rest"
-              variants={{}}
-              className="absolute inset-0"
+      {/* ── Desktop: sticky full-viewport accordion ── */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden hidden md:flex flex-row">
+        {categories.map((category, i) => {
+          const isActive = active === i;
+          const isDimmed = active !== null && !isActive;
+
+          return (
+            <Link
+              key={category.name}
+              href={category.href}
+              className="relative overflow-hidden block no-underline"
+              style={{
+                flex: isActive ? "3.5" : isDimmed ? "0.55" : "1",
+                transition: "flex 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+              }}
+              onMouseEnter={() => setActive(i)}
+              onMouseLeave={() => setActive(null)}
             >
               {/* Background image */}
               <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                className="absolute inset-0 bg-cover bg-center"
                 style={{
                   backgroundImage: `url(${category.bgImage})`,
                   opacity: 0.25,
@@ -75,51 +70,145 @@ const SlidingProjectsSection: FC = () => {
                 aria-hidden="true"
               />
 
-              {/* Sliding overlay on hover */}
-              <motion.div
+              {/* Bottom gradient — keeps text legible */}
+              <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: 'var(--brown2)',
+                  background:
+                    "linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.38) 45%, transparent 100%)",
+                  opacity: isActive ? 1 : 0.55,
+                  transition: "opacity 0.6s ease",
                 }}
-                variants={{
-                  rest: { y: '100%', opacity: 0.6 },
-                  hover: { y: '0%', opacity: 0.8, transition: { duration: 0.5 } },
-                }}
-                transition={{ duration: 0.5 }}
+                aria-hidden="true"
               />
-            </motion.div>
 
-            {/* Category text — vertical on desktop */}
-            <div
-              className={`
-                absolute inset-x-8 md:top-1/2 md:-translate-y-1/2 z-10 flex flex-col
-                md:[writing-mode:vertical-rl] md:rotate-180
-                ${category.textColor}
-                tracking-tight drop-shadow-2xl gap-2
-                group-hover:text-black transition-colors duration-500
-              `}
-            >
-              <span className="text-5xl font-medium md:text-8xl">{category.name}</span>
-              <span className="md:mt-2 text-2xl md:text-5xl font-light opacity-70 text-left group-hover:opacity-90">{category.subName}</span>
-            </div>
-
-            {/* View Projects button */}
-            <div className="relative z-10 mt-auto self-end md:self-auto">
+              {/* Top vignette */}
               <div
-                className={`
-                  flex items-center gap-2.5 border rounded-full px-5 py-2.5
-                  transition-all duration-500
-                  border-white/30 text-white
-                  group-hover:border-black group-hover:text-black group-hover:bg-transparent
-                `}
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, transparent 30%)",
+                }}
+                aria-hidden="true"
+              />
+
+              {/* Right hairline divider */}
+              <div
+                className="absolute top-0 right-0 bottom-0 w-px bg-white/10"
+                aria-hidden="true"
+              />
+
+              {/* ── Text block — always horizontal, bottom-anchored ── */}
+              <div className="absolute bottom-0 left-0 right-0 p-10 flex flex-col pointer-events-none">
+                {/* Subname — fades in on expand */}
+                <span
+                  className="text-[10px] tracking-[0.3em] uppercase text-[var(--brown1)]/65 mb-4 block"
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(8px)",
+                    transition: "opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s",
+                  }}
+                >
+                  {category.subName}
+                </span>
+
+                {/* Category name — always visible, grows on expand */}
+                <h2
+                  className="font-light text-white tracking-tight leading-none drop-shadow-lg"
+                  style={{
+                    fontSize: isActive ? "clamp(3.5rem, 6vw, 6rem)" : "clamp(1.5rem, 2vw, 2.2rem)",
+                    opacity: isDimmed ? 0.3 : 1,
+                    transition: "font-size 0.65s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.45s ease",
+                    marginBottom: isActive ? "2.5rem" : "0",
+                  }}
+                >
+                  {category.name}
+                </h2>
+
+                {/* CTA pill — only visible when expanded */}
+                <div
+                  className="inline-flex items-center gap-3 border border-white/22 text-white text-[10px] tracking-[0.22em] uppercase px-6 py-3 rounded-full self-start backdrop-blur-sm bg-white/[0.04] pointer-events-auto transition-colors duration-300 hover:border-[var(--brown1)] hover:text-[var(--brown1)]"
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(10px)",
+                    transition: "opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s",
+                    pointerEvents: isActive ? "auto" : "none",
+                  }}
+                >
+                  View Projects
+                  <ArrowRight size={11} strokeWidth={1.5} />
+                </div>
+              </div>
+
+              {/* Step index — top-right corner, always */}
+              <span
+                className="absolute top-8 right-8 text-[10px] tracking-[0.22em] text-white/20 font-light"
+                style={{
+                  opacity: isActive ? 0 : isDimmed ? 0.15 : 0.5,
+                  transition: "opacity 0.4s ease",
+                }}
               >
-                <span className="text-xs tracking-[0.18em] uppercase font-light whitespace-nowrap">View Projects</span>
-                <ArrowRight size={12} strokeWidth={1.5} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                0{i + 1}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* ── Mobile: stacked cards ── */}
+      <div className="flex md:hidden flex-col w-full">
+        {categories.map((category, i) => (
+          <Link
+            key={category.name}
+            href={category.href}
+            className="relative overflow-hidden block no-underline"
+            style={{ height: "38vh" }}
+          >
+            {/* Background */}
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${category.bgImage})`,
+                opacity: 0.38,
+                filter: "grayscale(40%)",
+              }}
+              aria-hidden="true"
+            />
+            {/* Gradient */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.2) 60%, transparent 100%)",
+              }}
+              aria-hidden="true"
+            />
+            {/* Bottom divider */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" aria-hidden="true" />
+
+            {/* Content */}
+            <div className="absolute bottom-0 left-0 right-0 p-7 flex flex-row items-end justify-between">
+              <div>
+                <span className="block text-[9px] tracking-[0.28em] uppercase text-[var(--brown1)]/55 mb-2">
+                  {category.subName}
+                </span>
+                <h2 className="text-4xl font-light text-white tracking-tight leading-none">
+                  {category.name}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 border border-white/20 text-white text-[9px] tracking-[0.18em] uppercase px-4 py-2.5 rounded-full bg-black/20 backdrop-blur-sm shrink-0">
+                View
+                <ArrowRight size={10} strokeWidth={1.5} />
               </div>
             </div>
+
+            {/* Index */}
+            <span className="absolute top-6 right-6 text-[9px] tracking-[0.22em] text-white/20">
+              0{i + 1}
+            </span>
           </Link>
         ))}
-      </motion.section>
+      </div>
     </motion.div>
   );
 };

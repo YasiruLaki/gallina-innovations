@@ -4,63 +4,63 @@ import React, { useRef, useEffect } from "react";
 
 export default function AnimatedNoise() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  let frame = 0;
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Draw at 1/4 resolution — canvas CSS stretches it back up.
+    // Quarter-res = 1/16 the pixel count → ~16× cheaper to fill.
+    const SCALE = 0.25;
     let animationFrameId: number;
+    let lastTime = 0;
+    // Target ~12 fps for the noise (imperceptible at this opacity)
+    const INTERVAL = 1000 / 12;
 
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    const resize = () => {
+      canvas.width = Math.floor(window.innerWidth * SCALE);
+      canvas.height = Math.floor(window.innerHeight * SCALE);
     };
+    resize();
+    window.addEventListener("resize", resize);
 
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    const render = (now: number) => {
+      animationFrameId = requestAnimationFrame(render);
+      if (now - lastTime < INTERVAL) return;
+      lastTime = now;
 
-    const generateNoise = () => {
-      const imageData = ctx.createImageData(canvas.width, canvas.height);
-      const buffer = new Uint32Array(imageData.data.buffer);
-
-      // Flicker factor oscillates between 0.5 and 1
-      const flicker = 0.75 + 0.25 * Math.sin(frame * 0.1);
-
-      for (let i = 0; i < buffer.length; i++) {
-        // Base alpha from 40 to 80 scaled by flicker
-        const baseAlpha = 40 + Math.random() * 40;
-        const alpha = Math.floor(baseAlpha * flicker);
-
-        // Black noise with varying alpha channel
-        buffer[i] = (alpha << 24);
+      const { width, height } = canvas;
+      const imageData = ctx.createImageData(width, height);
+      const buf = new Uint32Array(imageData.data.buffer);
+      const len = buf.length;
+      for (let i = 0; i < len; i++) {
+        // Cheap random: only alpha varies, colour is always black
+        buf[i] = ((40 + (Math.random() * 40 | 0)) << 24);
       }
-
       ctx.putImageData(imageData, 0, 0);
     };
 
-    const render = () => {
-      frame++;
-      generateNoise();
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("resize", resize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [frame]);
+  }, []);
 
   return (
     <canvas
       ref={canvasRef}
       className="pointer-events-none fixed inset-0 z-[9999]"
-      style={{ mixBlendMode: "screen", opacity: 0.45 }}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        mixBlendMode: "screen",
+        opacity: 0.45,
+        imageRendering: "pixelated",
+      }}
     />
   );
 }
