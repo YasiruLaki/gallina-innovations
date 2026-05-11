@@ -98,11 +98,11 @@ const SlidingProjectsSection: FC = () => {
                 aria-hidden="true"
               />
 
-              {/* ── Text block — always horizontal, bottom-anchored ── */}
-              <div className="absolute bottom-0 left-0 right-0 p-10 flex flex-col pointer-events-none">
+              {/* ── Text block — centered ── */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-10 pointer-events-none">
                 {/* Subname — fades in on expand */}
                 <span
-                  className="text-[10px] tracking-[0.3em] uppercase text-[var(--brown1)]/65 mb-4 block"
+                  className="text-[10px] tracking-[0.3em] uppercase text-[var(--brown1)]/65 mb-4 block text-center"
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive ? "translateY(0)" : "translateY(8px)",
@@ -114,9 +114,9 @@ const SlidingProjectsSection: FC = () => {
 
                 {/* Category name — always visible, grows on expand */}
                 <h2
-                  className="font-light text-white tracking-tight leading-none drop-shadow-lg"
+                  className="font-light text-white tracking-tight leading-none drop-shadow-lg text-center"
                   style={{
-                    fontSize: isActive ? "clamp(3.5rem, 6vw, 6rem)" : "clamp(1.5rem, 2vw, 2.2rem)",
+                    fontSize: isActive ? "clamp(3.5rem, 6vw, 6rem)" : "clamp(2.2rem, 3.5vw, 4rem)",
                     opacity: isDimmed ? 0.3 : 1,
                     transition: "font-size 0.65s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.45s ease",
                     marginBottom: isActive ? "2.5rem" : "0",
@@ -127,7 +127,7 @@ const SlidingProjectsSection: FC = () => {
 
                 {/* CTA pill — only visible when expanded */}
                 <div
-                  className="inline-flex items-center gap-3 border border-white/22 text-white text-[10px] tracking-[0.22em] uppercase px-6 py-3 rounded-full self-start backdrop-blur-sm bg-white/[0.04] pointer-events-auto transition-colors duration-300 hover:border-[var(--brown1)] hover:text-[var(--brown1)]"
+                  className="inline-flex items-center gap-3 border border-white/22 text-white text-[10px] tracking-[0.22em] uppercase px-6 py-3 rounded-full self-center backdrop-blur-sm bg-white/[0.04] pointer-events-auto transition-colors duration-300 hover:border-[var(--brown1)] hover:text-[var(--brown1)]"
                   style={{
                     opacity: isActive ? 1 : 0,
                     transform: isActive ? "translateY(0)" : "translateY(10px)",
@@ -187,16 +187,14 @@ const SlidingProjectsSection: FC = () => {
             <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" aria-hidden="true" />
 
             {/* Content */}
-            <div className="absolute bottom-0 left-0 right-0 p-7 flex flex-row items-end justify-between">
-              <div>
-                <span className="block text-[9px] tracking-[0.28em] uppercase text-[var(--brown1)]/55 mb-2">
-                  {category.subName}
-                </span>
-                <h2 className="text-4xl font-light text-white tracking-tight leading-none">
-                  {category.name}
-                </h2>
-              </div>
-              <div className="flex items-center gap-2 border border-white/20 text-white text-[9px] tracking-[0.18em] uppercase px-4 py-2.5 rounded-full bg-black/20 backdrop-blur-sm shrink-0">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-7">
+              <span className="block text-[9px] tracking-[0.28em] uppercase text-[var(--brown1)]/55 mb-2 text-center">
+                {category.subName}
+              </span>
+              <h2 className="text-5xl font-light text-white tracking-tight leading-none text-center mb-6">
+                {category.name}
+              </h2>
+              <div className="flex items-center gap-2 border border-white/20 text-white text-[9px] tracking-[0.18em] uppercase px-4 py-2.5 rounded-full bg-black/20 backdrop-blur-sm">
                 View
                 <ArrowRight size={10} strokeWidth={1.5} />
               </div>
