@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Logo from "../../public/logo-white.png";
+import { db } from "@/firebaseConfig";
 
 export default function Landing() {
   const [animate, setAnimate] = useState(false);
@@ -33,12 +34,8 @@ export default function Landing() {
 
     async function loadSlidesFromFirestore() {
       try {
-        // dynamic import to avoid bundling if you don't use Firebase elsewhere
-        await import("firebase/app");
-        const firestoreMod = await import("firebase/firestore");
-        const { getFirestore, doc, getDoc } = firestoreMod;
+        const { doc, getDoc } = await import("firebase/firestore");
 
-        const db = getFirestore();
         const ref = doc(db, "siteSettings", "landing");
         const snap = await getDoc(ref);
 
