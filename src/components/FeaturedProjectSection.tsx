@@ -26,11 +26,13 @@ const FeaturedProjectSection: React.FC<FeaturedProjectProps> = ({ featured }) =>
   useEffect(() => {
     if (images.length <= 1) return;
     const timer = setInterval(() => {
-      setPrev(current);
-      setCurrent((prevIdx) => (prevIdx + 1) % images.length);
-    }, 1500);
+      setCurrent((prevIdx) => {
+        setPrev(prevIdx);
+        return (prevIdx + 1) % images.length;
+      });
+    }, 5000);
     return () => clearInterval(timer);
-  }, [images.length, current]);
+  }, [images.length]);
 
   return (
     <motion.div
@@ -73,7 +75,6 @@ const FeaturedProjectSection: React.FC<FeaturedProjectProps> = ({ featured }) =>
                 className="object-cover w-full h-full"
                 width={800}
                 height={600}
-                priority
               />
             </motion.div>
           )}
