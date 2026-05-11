@@ -10,7 +10,6 @@ import { ArrowLeft, ChevronDown, X } from "lucide-react";
 import ContactPage from "@/components/contactUs";
 import Loading from "@/components/Loading";
 import DustOverlay from "@/components/dustOverlay";
-import CustomCursor from "@/components/CustomCursor";
 import MobileMenu from "@/components/MobileMenu";
 
 type Section = "Residential" | "Hospitality" | "Commercial";
@@ -135,7 +134,6 @@ const ProposedClient: React.FC<{ category?: string | null }> = () => {
   return (
     <>
       <DustOverlay />
-      <CustomCursor />
       <MobileMenu />
       {loading && <Loading />}
       <div className="w-full min-h-screen bg-[var(--background)] text-white font-sans">

@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Loading from "@/components/Loading";
 import MobileMenu from "@/components/MobileMenu";
-import CustomCursor from "@/components/CustomCursor";
 import DustOverlay from "@/components/dustOverlay";
 import ContactPage from "@/components/contactUs";
 import CopyrightFooter from "@/components/footer";
@@ -108,7 +107,6 @@ const CategoryPageClient: React.FC<Props> = ({ category }) => {
   return (
     <div className="w-full min-h-screen bg-[var(--background)] text-white font-sans">
       <DustOverlay />
-      <CustomCursor />
       <MobileMenu />
 
       {/* ── Hero ── */}

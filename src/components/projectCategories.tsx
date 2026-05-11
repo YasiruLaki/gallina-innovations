@@ -2,11 +2,13 @@
 
 import type { FC } from "react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { db } from "@/firebaseConfig";
+import { collection, getDocs, limit, query } from "firebase/firestore";
 
-const categories = [
+const staticCategories = [
   {
     name: "Residential",
     subName: "Landscape",
@@ -29,8 +31,38 @@ const categories = [
   },
 ];
 
+const PROPOSED_FALLBACK =
+  "https://cdn.gallinainnovations.com/uploads/mr.%20mendis%20%20%2812%29.JPEG";
+
 const SlidingProjectsSection: FC = () => {
   const [active, setActive] = useState<number | null>(null);
+  const [proposedBg, setProposedBg] = useState(PROPOSED_FALLBACK);
+
+  useEffect(() => {
+    const fetchProposedImage = async () => {
+      try {
+        const snap = await getDocs(query(collection(db, "proposed"), limit(1)));
+        if (!snap.empty) {
+          const data = snap.docs[0].data();
+          const imgs = Array.isArray(data.imageUrls) ? data.imageUrls : [];
+          if (imgs[0]) setProposedBg(imgs[0]);
+        }
+      } catch {
+        // keep fallback
+      }
+    };
+    fetchProposedImage();
+  }, []);
+
+  const categories = [
+    ...staticCategories,
+    {
+      name: "Proposed",
+      subName: "2026 — Coming Soon",
+      href: "/proposed",
+      bgImage: proposedBg,
+    },
+  ];
 
   return (
     <motion.div
