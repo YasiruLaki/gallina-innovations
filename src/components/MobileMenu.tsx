@@ -13,9 +13,10 @@ const menuItems = [
     name: "Projects",
     href: "/#projects",
     subItems: [
-      { name: "Residential", href: "/#residential" },
-      { name: "Hospitality", href: "/#hospitality" },
-      { name: "Commercial", href: "/#commercial" },
+      { name: "Residential", href: "/projects/residential" },
+      { name: "Hospitality", href: "/projects/hospitality" },
+      { name: "Commercial", href: "/projects/commercial" },
+      { name: "Proposed Projects", href: "/proposed" },
     ],
   },
   { name: "Contact", href: "#contactUs", subItems: [] },
@@ -84,34 +85,7 @@ const MenuItem: React.FC<{
                     e.preventDefault();
                     closeMenu();
                     setTimeout(() => {
-                      if (window.location.pathname !== "/") {
-                        window.location.href = subItem.href;
-                      } else {
-                        const hash = subItem.href
-                          .replace("/#", "")
-                          .toLowerCase();
-                        const sectionMap: Record<string, string> = {
-                          residential: "Residential",
-                          hospitality: "Hospitality",
-                          commercial: "Commercial",
-                        };
-                        const section = sectionMap[hash];
-                        if (
-                          section &&
-                          (window as WindowWithScroll).scrollToProjectCategory
-                        ) {
-                          (
-                            window as WindowWithScroll
-                          ).scrollToProjectCategory?.(section);
-                        } else {
-                          const el = document.getElementById(hash);
-                          if (el)
-                            el.scrollIntoView({
-                              behavior: "smooth",
-                              block: "start",
-                            });
-                        }
-                      }
+                      window.location.href = subItem.href;
                     }, 100);
                   }}
                   className={`hover:text-white transition-colors font-extralight ${
