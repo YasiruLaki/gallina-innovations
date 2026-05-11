@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Loading from "@/components/Loading";
 import MobileMenu from "@/components/MobileMenu";
-import CustomCursor from "@/components/CustomCursor";
 import DustOverlay from "@/components/dustOverlay";
 import ContactPage from "@/components/contactUs";
 import CopyrightFooter from "@/components/footer";
@@ -108,7 +107,6 @@ const CategoryPageClient: React.FC<Props> = ({ category }) => {
   return (
     <div className="w-full min-h-screen bg-[var(--background)] text-white font-sans">
       <DustOverlay />
-      <CustomCursor />
       <MobileMenu />
 
       {/* ── Hero ── */}
@@ -255,32 +253,6 @@ const CategoryPageClient: React.FC<Props> = ({ category }) => {
           </div>
         )}
       </main>
-
-      {/* ── Proposed Projects banner (Commercial only) ── */}
-      {category.toLowerCase() === "commercial" && (
-        <Link
-          href="/proposed"
-          className="block mx-6 sm:mx-12 md:mx-16 mb-16 border border-white/[0.08] hover:border-[var(--brown1)]/40 transition-colors duration-400 group no-underline"
-        >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 px-8 py-10">
-            <div>
-              <span className="block text-[10px] tracking-[0.3em] uppercase text-[var(--brown1)]/50 mb-3">
-                2026 — Coming Soon
-              </span>
-              <h2 className="text-4xl sm:text-5xl font-light text-white/60 group-hover:text-white tracking-tight leading-none transition-colors duration-400">
-                Proposed Projects
-              </h2>
-              <p className="text-sm text-white/30 font-light mt-3 tracking-wide">
-                A look at what we are designing next.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 border border-white/15 group-hover:border-[var(--brown1)] text-white/40 group-hover:text-[var(--brown1)] text-[10px] tracking-[0.22em] uppercase px-6 py-3 rounded-full transition-colors duration-300 shrink-0">
-              View Proposals
-              <ArrowRight size={11} strokeWidth={1.5} />
-            </div>
-          </div>
-        </Link>
-      )}
 
       <ContactPage />
       <CopyrightFooter />

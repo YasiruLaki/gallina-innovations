@@ -1,7 +1,6 @@
 "use client";
 import DustOverlay from "@/components/dustOverlay";
 import Loading from "@/components/Loading";
-import CustomCursor from "@/components/CustomCursor";
 import MobileMenu from "@/components/MobileMenu";
 import Landing from "@/components/Landing";
 import ProjectCategories from "@/components/projectCategories";
@@ -17,7 +16,6 @@ export default function Home() {
       {/* <SmoothScroll /> */}
       <DustOverlay />
       <Loading />
-      <CustomCursor />
       {/* <NavBar /> */}
       <MobileMenu />
       <Landing />
