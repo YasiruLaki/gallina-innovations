@@ -13,6 +13,7 @@ import CustomCursor from "@/components/CustomCursor";
 import DustOverlay from "@/components/dustOverlay";
 import ContactPage from "@/components/contactUs";
 import CopyrightFooter from "@/components/footer";
+import FeaturedProjectSection, { FirestoreProject as FeaturedFirestoreProject } from "@/components/FeaturedProjectSection";
 
 type FirestoreProject = {
   id?: string;
@@ -64,6 +65,7 @@ const CategoryPageClient: React.FC<Props> = ({ category }) => {
   const meta = categoryMeta[category.toLowerCase()];
   const [projects, setProjects] = useState<FirestoreProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [leadProject, setLeadProject] = useState<FeaturedFirestoreProject | null>(null);
 
   useEffect(() => {
     if (!meta) return;
@@ -83,7 +85,20 @@ const CategoryPageClient: React.FC<Props> = ({ category }) => {
       }
     };
     fetchProjects();
-  }, [meta]);
+
+    // Fetch lead project for hospitality
+    if (category.toLowerCase() === "hospitality") {
+      const lq = query(
+        collection(db, "projects"),
+        where("title", "==", "Mosvold Villa")
+      );
+      getDocs(lq).then((snap) => {
+        if (!snap.empty) {
+          setLeadProject(snap.docs[0].data() as FeaturedFirestoreProject);
+        }
+      });
+    }
+  }, [meta, category]);
 
   if (!meta) {
     router.push("/");
@@ -166,6 +181,9 @@ const CategoryPageClient: React.FC<Props> = ({ category }) => {
           Back to overview
         </Link>
       </div>
+
+      {/* ── Lead Project (Hospitality only) ── */}
+      {leadProject && <FeaturedProjectSection featured={leadProject} />}
 
       {/* ── Project grid ── */}
       <main className="px-6 sm:px-12 md:px-16 pt-14 pb-28">
