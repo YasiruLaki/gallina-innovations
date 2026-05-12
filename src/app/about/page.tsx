@@ -157,8 +157,8 @@ const AboutUs: FC = () => {
             viewport={{ once: true }}
           >
             {(() => {
-              const p1 = `At its core, Gallina Innovations is a design philosophy that reflects lifelong expression of a deep, instinctive understanding of space and character. The story begins with <span class="text-white font-medium">Prasanna Gunawardana</span>, who, from a young age, had an uncanny ability to visualize and design. He went from designing his childhood bedroom to opening his first studio space in a garage in 1996.`;
-              const p2 = `Long before Gallina became a formal studio, Prasanna was transforming living and work spaces for friends and family. With no formal training, only an innate sense of proportion and flow, his designs began speaking for themselves. What began as instinctive, one-off commissions has grown into a practice recognized for its spatial clarity, intentional minimalism, and legacy-led approach.`;
+              const p1 = `Prasanna Gunawardena’s architectural journey formally began in 1988, when he started his career as an architectural draftsman at Ranjan Nadesapillai Associates. Over the next five years, he honed his technical grounding and spatial discipline before moving on to work under Professor Lakshman Alwis at Design Consortium Limited (DCL). A further five years at DCL deepened his understanding of design thinking, professional practice, and architectural rigor.`;
+              const p2 = `In 1999, driven by a desire to work independently and guided by his instinctive design sensibility, Prasanna established his own studio in the garage of his father’s home in Baddegama. What began as a modest, self-founded practice has since evolved into a design philosophy shaped by over 35 years of experience, rooted in clarity, restraint, and a deep respect for spatial character.`;
 
               return (
                 <>

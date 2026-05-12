@@ -2,12 +2,15 @@
 /* eslint-disable @next/next/no-img-element */
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { db } from "@/firebaseConfig";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, X } from "lucide-react";
 import ContactPage from "@/components/contactUs";
 import Loading from "@/components/Loading";
+import DustOverlay from "@/components/dustOverlay";
+import MobileMenu from "@/components/MobileMenu";
 
 type Section = "Residential" | "Hospitality" | "Commercial";
 export type FirestoreProject = {
@@ -83,45 +86,9 @@ const UnorderedGallery: React.FC<{
   </motion.div>
 );
 // Dummy data (moved outside the component so it's stable for hooks)
-const dummyProjects: FirestoreProject[] = [
-  {
-    id: "1",
-    title: "Dummy Residential Project",
-    location: "Colombo, Sri Lanka",
-    tags: ["Landscape", "Modern"],
-    category: "Hospitality",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca",
-      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429",
-    ],
-  },
-  {
-    id: "2",
-    title: "Dummy Hospitality Project",
-    location: "Galle, Sri Lanka",
-    tags: ["Hotel", "Luxury"],
-    category: "Hospitality",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd",
-      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd",
-      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd",
-    ],
-  },
-  {
-    id: "3",
-    title: "Dummy Commercial Project",
-    location: "Kandy, Sri Lanka",
-    tags: ["Industrial", "Office"],
-    category: "Hospitality",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca",
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    ],
-  },
-];
+const dummyProjects: FirestoreProject[] = [];
 
-const ProposedClient: React.FC<{ category?: string | null }> = ({ category }) => {
+const ProposedClient: React.FC<{ category?: string | null }> = () => {
   const [projects, setProjects] = useState<FirestoreProject[]>([]);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [openProject, setOpenProject] = useState<string | null>(null);
@@ -134,16 +101,8 @@ const ProposedClient: React.FC<{ category?: string | null }> = ({ category }) =>
     setLoading(true);
 
     const load = async () => {
-      if (!category) {
-        setProjects(dummyProjects);
-        setOpenProject((prev) => prev ?? (dummyProjects[0]?.id || dummyProjects[0]?.title));
-        setLoading(false);
-        return;
-      }
-
       try {
-        const q = query(collection(db, "proposed"), where("category", "==", category));
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(collection(db, "proposed"));
         const fetched: FirestoreProject[] = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
@@ -157,17 +116,10 @@ const ProposedClient: React.FC<{ category?: string | null }> = ({ category }) =>
           });
         });
         if (!mounted) return;
-        if (fetched.length === 0) {
-          const filtered = dummyProjects.filter((p) => p.category === category);
-          setProjects(filtered);
-          if (filtered[0]) setOpenProject((prev) => prev ?? (filtered[0].id || filtered[0].title));
-        } else {
-          setProjects(fetched);
-          if (fetched[0]) setOpenProject((prev) => prev ?? (fetched[0].id || fetched[0].title));
-        }
+        setProjects(fetched);
+        if (fetched[0]) setOpenProject((prev) => prev ?? (fetched[0].id || fetched[0].title));
       } catch (err) {
         console.error(err);
-        if (mounted) setProjects(dummyProjects.filter((p) => p.category === category));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -177,49 +129,94 @@ const ProposedClient: React.FC<{ category?: string | null }> = ({ category }) =>
     return () => {
       mounted = false;
     };
-  }, [category]);
+  }, []);
 
   return (
     <>
+      <DustOverlay />
+      <MobileMenu />
       {loading && <Loading />}
-      <motion.div
-        className="min-h-screen text-white px-4 sm:px-8 lg:px-16 pt-30 font-sans"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <header className="mb-10">
-          <h1 className="text-6xl md:text-7xl font-medium mb-2">Proposed/Ongoing Projects</h1>
-          {category && (
-            <h2 className="text-4xl text-zinc-400 font-light mb-4">
-              <span className="text-[var(--brown1)]">{category}</span>
-            </h2>
-          )}
+      <div className="w-full min-h-screen bg-[var(--background)] text-white font-sans">
+        {/* ── Hero ── */}
+        <section className="relative w-full h-[45vh] min-h-[300px] overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center scale-105"
+            style={{
+              backgroundImage: `url(https://cdn.gallinainnovations.com/uploads/mr.%20mendis%20%20%2812%29.JPEG)`,
+              opacity: 0.18,
+              filter: "grayscale(55%)",
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/20 via-transparent to-[var(--background)]"
+            aria-hidden="true"
+          />
+          <div className="absolute top-0 left-0 right-0 h-px bg-white/10" aria-hidden="true" />
+          <div className="relative z-10 h-full flex flex-col justify-end px-6 sm:px-12 md:px-16 pb-14">
+            <nav className="flex items-center gap-2 text-[10px] tracking-[0.22em] uppercase text-white/35 mb-7">
+              <Link href="/" className="hover:text-white/60 transition-colors duration-200">Home</Link>
+              <span>/</span>
+              <Link href="/projects/commercial" className="hover:text-white/60 transition-colors duration-200">Commercial</Link>
+              <span>/</span>
+              <span className="text-[var(--brown1)]">Proposed</span>
+            </nav>
+            <motion.h1
+              className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-light text-white tracking-tight leading-none"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+            >
+              Proposed
+            </motion.h1>
+            <motion.p
+              className="text-lg sm:text-xl text-white/40 font-light mt-3 tracking-wide"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut", delay: 0.15 }}
+            >
+              2026 — Coming Soon
+            </motion.p>
+          </div>
+        </section>
 
-          <div className="flex-grow border-b border-solid border-zinc/30 mb-6" aria-hidden="true"></div>
-        </header>
+        {/* ── Back link ── */}
+        <div className="px-6 sm:px-12 md:px-16 pt-10 pb-8 border-b border-white/[0.06]">
+          <Link
+            href="/projects/commercial"
+            className="inline-flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase text-white/35 hover:text-[var(--brown1)] transition-colors duration-300 group"
+          >
+            <ArrowLeft size={13} className="group-hover:-translate-x-1 transition-transform duration-300" />
+            Back to Commercial
+          </Link>
+        </div>
 
-        <main>
-          {projects.length === 0 ? (
-            <div className="text-zinc-500 text-xl py-20">No proposed projects found for this category.</div>
+        {/* ── Accordion ── */}
+        <main className="px-6 sm:px-12 md:px-16 pt-14 pb-28">
+          {loading ? (
+            <div className="flex items-center justify-center py-36"><Loading /></div>
+          ) : projects.length === 0 ? (
+            <p className="text-white/30 text-lg py-20 tracking-wide">No proposed projects yet — check back soon.</p>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-0">
               {projects.map((project) => {
                 const isOpen = openProject === (project.id || project.title);
                 return (
-                  <div key={project.id || project.title} className="border-b border-zinc-700">
+                  <div key={project.id || project.title} className="border-b border-white/[0.07]">
                     <button
-                      className={`w-full text-left px-4 py-4 flex items-center justify-between text-2xl font-light focus:outline-none transition-colors duration-300 ${
-                        isOpen
-                          ? "bg-[var(--brown1)] text-black"
-                          : "bg-transparent text-white hover:bg-[var(--brown1)]/80 hover:text-black"
-                      }`}
+                      className="w-full text-left px-0 py-7 flex items-center justify-between focus:outline-none group"
                       onClick={() => setOpenProject(isOpen ? null : project.id || project.title)}
                       aria-expanded={isOpen}
                     >
-                      <span>{project.title}</span>
+                      <div>
+                        <span className="block text-[10px] tracking-[0.28em] uppercase text-[var(--brown1)]/50 mb-2">{project.category}</span>
+                        <span className={`text-3xl sm:text-4xl font-light tracking-tight transition-colors duration-300 ${isOpen ? "text-white" : "text-white/55 group-hover:text-white"}`}>
+                          {project.title}
+                        </span>
+                        <span className="block text-sm text-white/30 mt-1.5 tracking-wide">{project.location}</span>
+                      </div>
                       <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                        <ChevronDown size={32} className={`transition-colors ${isOpen ? "text-black" : "text-zinc-500"} group-hover:text-black`} />
+                        <ChevronDown size={24} strokeWidth={1} className={`transition-colors duration-300 ${isOpen ? "text-[var(--brown1)]" : "text-white/25 group-hover:text-white/60"}`} />
                       </motion.div>
                     </button>
                     <AnimatePresence initial={false}>
@@ -227,11 +224,18 @@ const ProposedClient: React.FC<{ category?: string | null }> = ({ category }) =>
                         <motion.div
                           key="content"
                           initial={{ maxHeight: 0, opacity: 0 }}
-                          animate={{ maxHeight: 1000, opacity: 1 }}
+                          animate={{ maxHeight: 2000, opacity: 1 }}
                           exit={{ maxHeight: 0, opacity: 0 }}
-                          transition={{ duration: 0.4, ease: "easeInOut" }}
-                          className="overflow-hidden px-4 pb-6 mt-6"
+                          transition={{ duration: 0.45, ease: "easeInOut" }}
+                          className="overflow-hidden pb-10"
                         >
+                          {project.tags && project.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-6">
+                              {project.tags.map((tag) => (
+                                <span key={tag} className="text-[10px] tracking-wide border border-zinc-700/70 text-zinc-500 px-3 py-0.5 rounded-full">{tag}</span>
+                              ))}
+                            </div>
+                          )}
                           <UnorderedGallery images={project.imageUrls} onImageClick={setModalImage} />
                         </motion.div>
                       )}
@@ -244,8 +248,8 @@ const ProposedClient: React.FC<{ category?: string | null }> = ({ category }) =>
         </main>
 
         {modalImage && <ImageModal imageUrl={modalImage} onClose={() => setModalImage(null)} />}
-      </motion.div>
-      <ContactPage />
+        <ContactPage />
+      </div>
     </>
   );
 };
