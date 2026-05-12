@@ -4,8 +4,17 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   devIndicators: false,
   images: {
-    // allow external images from any origin for now
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.gallinainnovations.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
   },
 };
 

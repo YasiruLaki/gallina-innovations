@@ -99,7 +99,8 @@ export default function Landing() {
             src={src}
             alt={`Slide ${idx + 1}`}
             fill
-            priority={slideIndex === idx}
+            priority={idx === 0}
+            loading={idx === 0 ? undefined : "lazy"}
             className={`object-cover w-full h-full transition-transform duration-[1500ms] ease-out  ${
               slideIndex === idx ? "scale-105" : "scale-100"
             }`}

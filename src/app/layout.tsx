@@ -46,6 +46,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Preload hero slide so LCP image starts fetching before JS runs */}
+        <link
+          rel="preload"
+          as="image"
+          href="https://cdn.gallinainnovations.com/uploads/landing-1.jpg"
+          // @ts-expect-error fetchpriority is valid but not yet in React types
+          fetchpriority="high"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
