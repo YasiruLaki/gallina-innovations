@@ -149,8 +149,9 @@ const SlidingProjectsSection: FC = () => {
                   className="font-light text-white tracking-tight leading-none drop-shadow-lg text-center"
                   style={{
                     fontSize: isActive ? "clamp(3.5rem, 6vw, 6rem)" : "clamp(2.2rem, 3.5vw, 4rem)",
-                    opacity: isDimmed ? 0.3 : 1,
-                    transition: "font-size 0.65s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.45s ease",
+                    opacity: isDimmed ? 0 : 1,
+                    transform: isDimmed ? "translateY(6px)" : "translateY(0)",
+                    transition: "font-size 0.65s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.35s ease, transform 0.35s ease",
                     marginBottom: isActive ? "2.5rem" : "0",
                   }}
                 >
